@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<input-method xmlns:android="http://schemas.android.com/apk/res/android"
+    android:settingsActivity="com.bhs.mkeyboard.MainActivity"
+    android:icon="@mipmap/ic_launcher"
+    android:label="@string/app_name">
+    
+    <subtype
+        android:label="English"
+        android:imeSubtypeLocale="en_US"
+        android:imeSubtypeMode="keyboard"
+        android:icon="@mipmap/ic_launcher" />
+        
+    <subtype
+        android:label="हिंदी (Hindi)"
+        android:imeSubtypeLocale="hi"
+        android:imeSubtypeMode="keyboard"
+        android:icon="@mipmap/ic_launcher" />
+        
+    <subtype
+        android:label="𑴎𑴟𑴤𑴦 (Gondi)"
+        android:imeSubtypeLocale="gon"
+        android:imeSubtypeMode="keyboard"
+        android:icon="@mipmap/ic_launcher" />
+</input-method>

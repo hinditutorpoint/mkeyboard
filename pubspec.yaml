@@ -1,0 +1,62 @@
+name: mkeyboard
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  hive_flutter: ^1.1.0
+  provider: ^6.1.5+1
+  shared_preferences: ^2.5.3
+  path_provider: ^2.1.5
+  hive: ^2.2.3
+
+  flutter_quill: ^11.5.0
+  share_plus: ^12.0.1
+  pdf: ^3.11.3 
+  printing: ^5.14.2
+  screenshot: ^3.0.0
+  saver_gallery: ^4.1.0
+  permission_handler: ^12.0.1
+  flutter_colorpicker: ^1.1.0
+  file_picker: ^10.3.8 
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+  flutter_launcher_icons: ^0.14.4
+  build_runner: ^2.7.1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/logo/
+
+  fonts:
+    # Hindi Font
+    - family: NotoSansDevanagari
+      fonts:
+        - asset: assets/fonts/NotoSansDevanagari-Regular.ttf
+        - asset: assets/fonts/NotoSansDevanagari-Bold.ttf
+          weight: 700
+    
+    # Gondi Font
+    - family: NotoSansMasaramGondi
+      fonts:
+        - asset: assets/fonts/NotoSansMasaramGondi-Regular.ttf
+          weight: 400
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo/mkeybord.png"
+  adaptive_icon_background: "#333333"
+  adaptive_icon_foreground: "assets/logo/mkeybord.png"
