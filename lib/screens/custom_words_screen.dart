@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/settings_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../models/custom_word.dart';
 import '../models/keyboard_language.dart';
+import '../providers/settings_provider.dart';
 
-class CustomWordsScreen extends StatefulWidget {
+class CustomWordsScreen extends ConsumerStatefulWidget {
   const CustomWordsScreen({super.key});
 
   @override
-  State<CustomWordsScreen> createState() => _CustomWordsScreenState();
+  ConsumerState<CustomWordsScreen> createState() => _CustomWordsScreenState();
 }
 
-class _CustomWordsScreenState extends State<CustomWordsScreen>
+class _CustomWordsScreenState extends ConsumerState<CustomWordsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
@@ -37,134 +38,132 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsProvider>(
-      builder: (context, provider, child) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Custom Words'),
-            bottom: TabBar(
-              controller: _tabController,
-              tabs: [
-                Tab(
-                  icon: const Icon(Icons.list),
-                  text: 'All (${provider.getAllCustomWords().length})',
-                ),
-                Tab(
-                  icon: const Icon(Icons.abc),
-                  text:
-                      'Hindi (${provider.getCustomWordsByLanguage(1).length})',
-                ),
-                Tab(
-                  icon: const Text('𑴎𑴟', style: TextStyle(fontSize: 20)),
-                  text:
-                      'Gondi (${provider.getCustomWordsByLanguage(2).length})',
-                ),
-              ],
-            ),
-            actions: [
-              PopupMenuButton<String>(
-                onSelected: (value) => _handleMenuAction(value, provider),
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'add',
-                    child: Row(
-                      children: [
-                        Icon(Icons.add),
-                        SizedBox(width: 8),
-                        Text('Add Word'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'import',
-                    child: Row(
-                      children: [
-                        Icon(Icons.file_upload),
-                        SizedBox(width: 8),
-                        Text('Import'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'export',
-                    child: Row(
-                      children: [
-                        Icon(Icons.file_download),
-                        SizedBox(width: 8),
-                        Text('Export'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuDivider(),
-                  const PopupMenuItem(
-                    value: 'clear',
-                    child: Row(
-                      children: [
-                        Icon(Icons.delete_forever, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('Clear All', style: TextStyle(color: Colors.red)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          body: Column(
-            children: [
-              // Search bar
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search words...',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () => _searchController.clear(),
-                          )
-                        : null,
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-              ),
+    final customWordsNotifier = ref.read(customWordsProvider.notifier);
+    final allWords = ref.watch(allCustomWordsProvider);
+    final hindiWords = ref.watch(customWordsByLanguageProvider(1));
+    final gondiWords = ref.watch(customWordsByLanguageProvider(2));
 
-              // Tab content
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Custom Words'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(icon: const Icon(Icons.list), text: 'All (${allWords.length})'),
+            Tab(
+              icon: const Icon(Icons.abc),
+              text: 'Hindi (${hindiWords.length})',
+            ),
+            Tab(
+              icon: const Text('𑴎𑴟', style: TextStyle(fontSize: 20)),
+              text: 'Gondi (${gondiWords.length})',
+            ),
+          ],
+        ),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) =>
+                _handleMenuAction(value, customWordsNotifier),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'add',
+                child: Row(
                   children: [
-                    _buildWordList(provider, null),
-                    _buildWordList(provider, 1), // Hindi
-                    _buildWordList(provider, 2), // Gondi
+                    Icon(Icons.add),
+                    SizedBox(width: 8),
+                    Text('Add Word'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'import',
+                child: Row(
+                  children: [
+                    Icon(Icons.file_upload),
+                    SizedBox(width: 8),
+                    Text('Import'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'export',
+                child: Row(
+                  children: [
+                    Icon(Icons.file_download),
+                    SizedBox(width: 8),
+                    Text('Export'),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem(
+                value: 'clear',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_forever, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('Clear All', style: TextStyle(color: Colors.red)),
                   ],
                 ),
               ),
             ],
           ),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => _showAddDialog(context, provider),
-            icon: const Icon(Icons.add),
-            label: const Text('Add Word'),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search words...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () => _searchController.clear(),
+                      )
+                    : null,
+                border: const OutlineInputBorder(),
+              ),
+            ),
           ),
-        );
-      },
+
+          // Tab content
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildWordList(ref, null),
+                _buildWordList(ref, 1), // Hindi
+                _buildWordList(ref, 2), // Gondi
+              ],
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showAddDialog(context, customWordsNotifier),
+        icon: const Icon(Icons.add),
+        label: const Text('Add Word'),
+      ),
     );
   }
 
-  Widget _buildWordList(SettingsProvider provider, int? languageIndex) {
+  Widget _buildWordList(WidgetRef ref, int? languageIndex) {
     List<CustomWord> words;
 
     if (_searchQuery.isEmpty) {
-      words = languageIndex == null
-          ? provider.getAllCustomWords()
-          : provider.getCustomWordsByLanguage(languageIndex);
+      if (languageIndex == null) {
+        words = ref.watch(allCustomWordsProvider);
+      } else {
+        words = ref.watch(customWordsByLanguageProvider(languageIndex));
+      }
     } else {
-      words = provider.searchCustomWords(
-        _searchQuery,
-        languageIndex: languageIndex,
+      words = ref.watch(
+        searchCustomWordsProvider((_searchQuery, languageIndex)),
       );
     }
 
@@ -176,7 +175,8 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
       padding: const EdgeInsets.symmetric(horizontal: 16),
       itemCount: words.length,
       itemBuilder: (context, index) {
-        return _buildWordCard(words[index], provider);
+        final customWordsNotifier = ref.read(customWordsProvider.notifier);
+        return _buildWordCard(words[index], customWordsNotifier);
       },
     );
   }
@@ -186,6 +186,8 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
     if (_searchQuery.isNotEmpty) {
       message = 'No results found for "$_searchQuery"';
     }
+
+    final customWordsNotifier = ref.read(customWordsProvider.notifier);
 
     return Center(
       child: Column(
@@ -208,7 +210,7 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
             ElevatedButton.icon(
               onPressed: () => _showAddDialog(
                 context,
-                context.read<SettingsProvider>(),
+                customWordsNotifier,
                 defaultLanguageIndex: languageIndex,
               ),
               icon: const Icon(Icons.add),
@@ -219,7 +221,10 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
     );
   }
 
-  Widget _buildWordCard(CustomWord word, SettingsProvider provider) {
+  Widget _buildWordCard(
+    CustomWord word,
+    StateNotifier<AsyncValue<List<CustomWord>>> notifier,
+  ) {
     final theme = Theme.of(context);
     final language = KeyboardLanguage.values[word.languageIndex];
     final fontFamily = language.fontFamily;
@@ -294,15 +299,16 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
         ),
         trailing: PopupMenuButton<String>(
           onSelected: (value) {
+            final customWordsNotifier = ref.read(customWordsProvider.notifier);
             switch (value) {
               case 'pin':
-                provider.togglePinned(word);
+                customWordsNotifier.togglePinned(word);
                 break;
               case 'edit':
-                _showEditDialog(context, word, provider);
+                _showEditDialog(context, word, customWordsNotifier);
                 break;
               case 'delete':
-                _showDeleteDialog(context, word, provider);
+                _showDeleteDialog(context, word, customWordsNotifier);
                 break;
             }
           },
@@ -342,32 +348,35 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
     );
   }
 
-  void _handleMenuAction(String action, SettingsProvider provider) {
+  void _handleMenuAction(
+    String action,
+    StateNotifier<AsyncValue<List<CustomWord>>> notifier,
+  ) {
     switch (action) {
       case 'add':
-        _showAddDialog(context, provider);
+        _showAddDialog(context, notifier);
         break;
       case 'import':
-        _showImportDialog(context, provider);
+        _showImportDialog(context, notifier);
         break;
       case 'export':
-        _showExportDialog(context, provider);
+        _showExportDialog(context, notifier);
         break;
       case 'clear':
-        _showClearDialog(context, provider);
+        _showClearDialog(context, notifier);
         break;
     }
   }
 
   void _showAddDialog(
     BuildContext context,
-    SettingsProvider provider, {
+    StateNotifier<AsyncValue<List<CustomWord>>> notifier, {
     int? defaultLanguageIndex,
   }) {
     final englishController = TextEditingController();
     final translatedController = TextEditingController();
     final formKey = GlobalKey<FormState>();
-    int selectedLanguage = defaultLanguageIndex ?? 1; // Default to Hindi
+    int selectedLanguage = defaultLanguageIndex ?? 1;
 
     showDialog(
       context: context,
@@ -383,7 +392,6 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Language selector
                     DropdownButtonFormField<int>(
                       value: selectedLanguage,
                       decoration: const InputDecoration(
@@ -407,8 +415,6 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
                       },
                     ),
                     const SizedBox(height: 16),
-
-                    // English word
                     TextFormField(
                       controller: englishController,
                       decoration: const InputDecoration(
@@ -425,8 +431,6 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
                       textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 16),
-
-                    // Translated word
                     TextFormField(
                       controller: translatedController,
                       decoration: InputDecoration(
@@ -459,7 +463,8 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
               ElevatedButton(
                 onPressed: () async {
                   if (formKey.currentState!.validate()) {
-                    final success = await provider.addCustomWord(
+                    final customWordsNotifier = notifier as CustomWordsNotifier;
+                    final success = await customWordsNotifier.addCustomWord(
                       englishController.text,
                       translatedController.text,
                       selectedLanguage,
@@ -493,7 +498,7 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
   void _showEditDialog(
     BuildContext context,
     CustomWord word,
-    SettingsProvider provider,
+    StateNotifier<AsyncValue<List<CustomWord>>> notifier,
   ) {
     final englishController = TextEditingController(text: word.englishWord);
     final translatedController = TextEditingController(
@@ -550,7 +555,8 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
           ElevatedButton(
             onPressed: () {
               if (formKey.currentState!.validate()) {
-                provider.updateCustomWord(
+                final customWordsNotifier = notifier as CustomWordsNotifier;
+                customWordsNotifier.updateCustomWord(
                   word,
                   englishController.text,
                   translatedController.text,
@@ -575,7 +581,7 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
   void _showDeleteDialog(
     BuildContext context,
     CustomWord word,
-    SettingsProvider provider,
+    StateNotifier<AsyncValue<List<CustomWord>>> notifier,
   ) {
     showDialog(
       context: context,
@@ -589,7 +595,8 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
           ),
           TextButton(
             onPressed: () {
-              provider.deleteCustomWord(word);
+              final customWordsNotifier = notifier as CustomWordsNotifier;
+              customWordsNotifier.deleteCustomWord(word);
               Navigator.pop(context);
 
               ScaffoldMessenger.of(
@@ -603,7 +610,10 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
     );
   }
 
-  void _showImportDialog(BuildContext context, SettingsProvider provider) {
+  void _showImportDialog(
+    BuildContext context,
+    StateNotifier<AsyncValue<List<CustomWord>>> notifier,
+  ) {
     final controller = TextEditingController();
 
     showDialog(
@@ -638,6 +648,7 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
             onPressed: () async {
               final lines = controller.text.split('\n');
               int imported = 0;
+              final customWordsNotifier = notifier as CustomWordsNotifier;
 
               for (var line in lines) {
                 if (line.contains('=') && line.contains('|')) {
@@ -647,7 +658,7 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
                     final languageIndex = int.tryParse(parts[1].trim());
 
                     if (wordParts.length == 2 && languageIndex != null) {
-                      final success = await provider.addCustomWord(
+                      final success = await customWordsNotifier.addCustomWord(
                         wordParts[0].trim(),
                         wordParts[1].trim(),
                         languageIndex,
@@ -672,8 +683,12 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
     );
   }
 
-  void _showExportDialog(BuildContext context, SettingsProvider provider) {
-    final words = provider.getAllCustomWords();
+  void _showExportDialog(
+    BuildContext context,
+    StateNotifier<AsyncValue<List<CustomWord>>> notifier,
+  ) {
+    final customWordsNotifier = notifier as CustomWordsNotifier;
+    final words = customWordsNotifier.getAllWords();
     final exportText = words
         .map((w) => '${w.englishWord}=${w.translatedWord}|${w.languageIndex}')
         .join('\n');
@@ -708,7 +723,10 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
     );
   }
 
-  void _showClearDialog(BuildContext context, SettingsProvider provider) {
+  void _showClearDialog(
+    BuildContext context,
+    StateNotifier<AsyncValue<List<CustomWord>>> notifier,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -723,7 +741,8 @@ class _CustomWordsScreenState extends State<CustomWordsScreen>
           ),
           TextButton(
             onPressed: () {
-              provider.clearAllCustomWords();
+              final customWordsNotifier = notifier as CustomWordsNotifier;
+              customWordsNotifier.clearAll();
               Navigator.pop(context);
 
               ScaffoldMessenger.of(context).showSnackBar(

@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/settings_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/keyboard_theme.dart';
+import '../providers/settings_provider.dart';
 import '../widgets/keyboard_preview.dart';
 
-class ThemeSelectorScreen extends StatefulWidget {
+class ThemeSelectorScreen extends ConsumerStatefulWidget {
   const ThemeSelectorScreen({super.key});
 
   @override
-  State<ThemeSelectorScreen> createState() => _ThemeSelectorScreenState();
+  ConsumerState<ThemeSelectorScreen> createState() =>
+      _ThemeSelectorScreenState();
 }
 
-class _ThemeSelectorScreenState extends State<ThemeSelectorScreen> {
+class _ThemeSelectorScreenState extends ConsumerState<ThemeSelectorScreen> {
   int _selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    final currentTheme = context.read<SettingsProvider>().settings.themeName;
+    final currentTheme = ref.read(settingsProvider).themeName;
     _selectedIndex = KeyboardTheme.allThemes.indexWhere(
       (theme) => theme.name == currentTheme,
     );
@@ -33,7 +34,10 @@ class _ThemeSelectorScreenState extends State<ThemeSelectorScreen> {
           TextButton(
             onPressed: () {
               final selectedTheme = KeyboardTheme.allThemes[_selectedIndex];
-              context.read<SettingsProvider>().setThemeName(selectedTheme.name);
+              // ✅ Update via Riverpod
+              ref
+                  .read(settingsProvider.notifier)
+                  .setThemeName(selectedTheme.name);
               Navigator.pop(context);
             },
             child: const Text('APPLY'),
@@ -42,7 +46,6 @@ class _ThemeSelectorScreenState extends State<ThemeSelectorScreen> {
       ),
       body: Column(
         children: [
-          // Preview
           Container(
             height: 250,
             color: Colors.grey[200],
@@ -52,20 +55,14 @@ class _ThemeSelectorScreenState extends State<ThemeSelectorScreen> {
               ),
             ),
           ),
-
           const SizedBox(height: 16),
-
-          // Theme name
           Text(
             KeyboardTheme.allThemes[_selectedIndex].name,
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
-
           const SizedBox(height: 8),
-
-          // Theme details
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Row(
@@ -88,10 +85,7 @@ class _ThemeSelectorScreenState extends State<ThemeSelectorScreen> {
               ],
             ),
           ),
-
           const SizedBox(height: 24),
-
-          // Theme list
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -123,7 +117,6 @@ class _ThemeSelectorScreenState extends State<ThemeSelectorScreen> {
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
-                          // Color preview
                           Container(
                             width: 60,
                             height: 60,
@@ -143,10 +136,7 @@ class _ThemeSelectorScreenState extends State<ThemeSelectorScreen> {
                               ),
                             ),
                           ),
-
                           const SizedBox(width: 16),
-
-                          // Theme info
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,8 +159,6 @@ class _ThemeSelectorScreenState extends State<ThemeSelectorScreen> {
                               ],
                             ),
                           ),
-
-                          // Selection indicator
                           if (isSelected)
                             Icon(
                               Icons.check_circle,

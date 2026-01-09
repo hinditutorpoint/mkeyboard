@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
+
 import 'keyboard_controller.dart';
 import 'suggestion_bar.dart';
 import 'key_button.dart';
@@ -9,43 +11,42 @@ import '../models/keyboard_settings.dart';
 import '../models/custom_word.dart';
 import '../services/hive_service.dart';
 import '../services/transliterator_factory.dart';
+import '../providers/settings_provider.dart';
 import 'keyboard_layouts.dart';
 
-class KeyboardWidget extends StatefulWidget {
+class KeyboardWidget extends ConsumerStatefulWidget {
   const KeyboardWidget({super.key});
 
   @override
-  State<KeyboardWidget> createState() => _KeyboardWidgetState();
+  ConsumerState<KeyboardWidget> createState() => _KeyboardWidgetState();
 }
 
-class _KeyboardWidgetState extends State<KeyboardWidget> {
+class _KeyboardWidgetState extends ConsumerState<KeyboardWidget> {
   KeyboardLanguage _currentLanguage = KeyboardLanguage.english;
   bool _isShift = false;
   bool _isCaps = false;
   bool _showSymbols = false;
+
   String _inputBuffer = '';
   List<CustomWord> _customSuggestions = [];
   List<String> _transliteratedSuggestions = [];
 
-  KeyboardSettings _settings = KeyboardSettings();
-  KeyboardTheme _theme = KeyboardTheme.light;
-
-  // Debounce timer for suggestions
   Timer? _suggestionDebounce;
-
-  // Debounce timer for Hive recording
   Timer? _hiveDebounce;
   final List<String> _pendingKeyPresses = [];
+  final Map<String, String> _transliterationCache = {};
 
   @override
   void initState() {
     super.initState();
-    _loadSettings();
     KeyboardController.init();
 
     KeyboardController.onStartInput = (info) {
-      _loadSettings();
+      final settings = ref.read(settingsProvider);
       setState(() {
+        _currentLanguage = settings.defaultLanguage;
+        _isShift = false;
+        _isCaps = false;
         _inputBuffer = '';
         _customSuggestions = [];
         _transliteratedSuggestions = [];
@@ -60,20 +61,21 @@ class _KeyboardWidgetState extends State<KeyboardWidget> {
     super.dispose();
   }
 
-  void _loadSettings() {
-    _settings = HiveService.getSettings();
-    _currentLanguage = _settings.defaultLanguage;
-    _theme = KeyboardTheme.fromName(_settings.themeName);
-    setState(() {});
+  List<Widget> _withGap(List<Widget> children, double gap) {
+    if (children.isEmpty) return const [];
+    final out = <Widget>[];
+    for (int i = 0; i < children.length; i++) {
+      out.add(children[i]);
+      if (i != children.length - 1) out.add(SizedBox(width: gap));
+    }
+    return out;
   }
 
-  void _onKeyTap(String key) {
-    // Haptic feedback FIRST (instant response)
-    if (_settings.hapticFeedback) {
+  void _onKeyTap(String key, KeyboardSettings settings) {
+    if (settings.hapticFeedback) {
       KeyboardController.vibrate();
     }
 
-    // Record key press asynchronously (batched)
     _recordKeyPressAsync(key);
 
     if (_showSymbols) {
@@ -82,58 +84,57 @@ class _KeyboardWidgetState extends State<KeyboardWidget> {
     }
 
     if (_currentLanguage == KeyboardLanguage.english) {
-      String char = (_isShift || _isCaps) ? key.toUpperCase() : key;
+      final char = (_isShift || _isCaps) ? key.toUpperCase() : key;
       KeyboardController.inputText(char);
 
       if (_isShift && !_isCaps) {
         setState(() => _isShift = false);
       }
     } else {
-      // TRANSLITERATION MODE
-      String char = _isShift ? key.toUpperCase() : key;
+      final char = _isShift ? key.toUpperCase() : key;
 
-      // Update buffer immediately (no setState yet)
-      _inputBuffer += char;
+      setState(() {
+        _inputBuffer += char;
+      });
 
-      // Input to text field immediately for instant feedback
       KeyboardController.inputText(char);
 
       if (_isShift && !_isCaps) {
-        _isShift = false;
+        setState(() => _isShift = false);
       }
 
-      // Update suggestions with debounce (non-blocking)
-      _updateSuggestionsDebounced();
+      _updateSuggestionsDebounced(settings);
     }
   }
 
-  // Batch Hive operations to reduce disk I/O
   void _recordKeyPressAsync(String key) {
     _pendingKeyPresses.add(key);
-
     _hiveDebounce?.cancel();
-    _hiveDebounce = Timer(const Duration(milliseconds: 500), () async {
+
+    _hiveDebounce = Timer(const Duration(milliseconds: 1000), () async {
       if (_pendingKeyPresses.isEmpty) return;
 
       final keys = List<String>.from(_pendingKeyPresses);
       _pendingKeyPresses.clear();
 
-      // Run in background
-      for (final k in keys) {
-        await HiveService.recordKeyPress(k);
+      try {
+        for (final k in keys) {
+          await HiveService.recordKeyPress(k);
+        }
+      } catch (e) {
+        debugPrint('Error recording key press: $e');
       }
     });
   }
 
-  // Debounced suggestion update
-  void _updateSuggestionsDebounced() {
+  void _updateSuggestionsDebounced(KeyboardSettings settings) {
     _suggestionDebounce?.cancel();
-    _suggestionDebounce = Timer(const Duration(milliseconds: 150), () {
-      _updateSuggestions();
+    _suggestionDebounce = Timer(const Duration(milliseconds: 50), () {
+      _updateSuggestions(settings);
     });
   }
 
-  void _updateSuggestions() {
+  void _updateSuggestions(KeyboardSettings settings) {
     if (_inputBuffer.isEmpty) {
       setState(() {
         _customSuggestions = [];
@@ -142,12 +143,11 @@ class _KeyboardWidgetState extends State<KeyboardWidget> {
       return;
     }
 
-    // Run heavy computation in microtask (non-blocking)
-    Future.microtask(() {
+    try {
       final customSuggestions = HiveService.getSuggestions(
         _inputBuffer,
         _currentLanguage == KeyboardLanguage.hindi ? 1 : 2,
-        limit: _settings.suggestionCount,
+        limit: settings.suggestionCount,
       );
 
       final transliterator = TransliteratorFactory.getTransliterator(
@@ -157,126 +157,127 @@ class _KeyboardWidgetState extends State<KeyboardWidget> {
       final transliteratedSuggestions =
           transliterator?.getSuggestions(
             _inputBuffer,
-            limit: _settings.suggestionCount - customSuggestions.length,
+            limit: settings.suggestionCount - customSuggestions.length,
           ) ??
           [];
 
-      // Update UI only after computation
-      if (mounted) {
-        setState(() {
-          _customSuggestions = customSuggestions;
-          _transliteratedSuggestions = transliteratedSuggestions;
-        });
-      }
-    });
+      if (!mounted) return;
+      setState(() {
+        _customSuggestions = customSuggestions;
+        _transliteratedSuggestions = transliteratedSuggestions;
+      });
+    } catch (e) {
+      debugPrint('Error updating suggestions: $e');
+    }
   }
 
   void _commitBuffer() {
     if (_inputBuffer.isEmpty) return;
 
-    final transliterator = TransliteratorFactory.getTransliterator(
-      _currentLanguage,
-    );
-    if (transliterator != null) {
-      final translated = transliterator.transliterate(_inputBuffer);
+    try {
+      final cacheKey = _inputBuffer;
 
-      // Delete the buffer characters we already typed
-      for (int i = 0; i < _inputBuffer.length; i++) {
-        KeyboardController.deleteBackward();
-      }
-
-      // Insert translated text
-      KeyboardController.inputText(translated);
-    }
-
-    _inputBuffer = '';
-    _customSuggestions = [];
-    _transliteratedSuggestions = [];
-    setState(() {});
-  }
-
-  void _onSuggestionTap(String suggestion) async {
-    if (_settings.hapticFeedback) {
-      KeyboardController.vibrate();
-    }
-
-    final customWord = _customSuggestions.firstWhere(
-      (w) => w.englishWord == suggestion,
-      orElse: () => CustomWord(
-        englishWord: '',
-        translatedWord: '',
-        languageIndex: 0,
-        createdAt: DateTime.now(),
-      ),
-    );
-
-    if (customWord.englishWord.isNotEmpty) {
-      // Delete buffer
-      for (int i = 0; i < _inputBuffer.length; i++) {
-        KeyboardController.deleteBackward();
-      }
-
-      // Increment usage async
-      HiveService.incrementWordUsage(customWord);
-      KeyboardController.inputText('${customWord.translatedWord} ');
-    } else {
       final transliterator = TransliteratorFactory.getTransliterator(
         _currentLanguage,
       );
-      if (transliterator != null) {
-        // Delete buffer
-        for (int i = 0; i < _inputBuffer.length; i++) {
-          KeyboardController.deleteBackward();
-        }
+      final translated =
+          _transliterationCache[cacheKey] ??
+          (transliterator?.transliterate(_inputBuffer) ?? _inputBuffer);
 
-        final translated = transliterator.transliterate(suggestion);
-        KeyboardController.inputText('$translated ');
+      _transliterationCache[cacheKey] = translated;
+
+      for (int i = 0; i < _inputBuffer.length; i++) {
+        KeyboardController.deleteBackward();
       }
-    }
+      KeyboardController.inputText(translated);
 
-    _inputBuffer = '';
-    _customSuggestions = [];
-    _transliteratedSuggestions = [];
-    setState(() {});
+      setState(() {
+        _inputBuffer = '';
+        _customSuggestions = [];
+        _transliteratedSuggestions = [];
+      });
+    } catch (e) {
+      debugPrint('Error committing buffer: $e');
+    }
   }
 
-  void _onSpaceTap() {
-    if (_settings.hapticFeedback) {
+  void _onSuggestionTap(String suggestion, KeyboardSettings settings) {
+    if (settings.hapticFeedback) {
       KeyboardController.vibrate();
     }
 
+    try {
+      CustomWord? customWord;
+      for (final w in _customSuggestions) {
+        if (w.englishWord == suggestion) {
+          customWord = w;
+          break;
+        }
+      }
+
+      for (int i = 0; i < _inputBuffer.length; i++) {
+        KeyboardController.deleteBackward();
+      }
+
+      if (customWord != null) {
+        HiveService.incrementWordUsage(customWord);
+        KeyboardController.inputText('${customWord.translatedWord} ');
+      } else {
+        final transliterator = TransliteratorFactory.getTransliterator(
+          _currentLanguage,
+        );
+        final translated =
+            _transliterationCache[suggestion] ??
+            (transliterator?.transliterate(suggestion) ?? suggestion);
+        _transliterationCache[suggestion] = translated;
+
+        KeyboardController.inputText('$translated ');
+      }
+
+      setState(() {
+        _inputBuffer = '';
+        _customSuggestions = [];
+        _transliteratedSuggestions = [];
+      });
+    } catch (e) {
+      debugPrint('Error in onSuggestionTap: $e');
+    }
+  }
+
+  void _onSpaceTap(KeyboardSettings settings) {
+    if (settings.hapticFeedback) {
+      KeyboardController.vibrate();
+    }
     _commitBuffer();
     KeyboardController.inputText(' ');
   }
 
-  void _onBackspaceTap() {
-    if (_settings.hapticFeedback) {
+  void _onBackspaceTap(KeyboardSettings settings) {
+    if (settings.hapticFeedback) {
       KeyboardController.vibrate();
     }
 
     if (_inputBuffer.isNotEmpty) {
-      _inputBuffer = _inputBuffer.substring(0, _inputBuffer.length - 1);
+      setState(() {
+        _inputBuffer = _inputBuffer.substring(0, _inputBuffer.length - 1);
+      });
       KeyboardController.deleteBackward();
-      _updateSuggestionsDebounced();
-
-      // Only update preview, not entire keyboard
-      setState(() {});
+      _updateSuggestionsDebounced(settings);
     } else {
       KeyboardController.deleteBackward();
     }
   }
 
-  void _onEnterTap() {
-    if (_settings.hapticFeedback) {
+  void _onEnterTap(KeyboardSettings settings) {
+    if (settings.hapticFeedback) {
       KeyboardController.vibrate();
     }
-
     _commitBuffer();
     KeyboardController.sendKeyEvent(66);
   }
 
-  void _onShiftTap() {
-    if (_settings.hapticFeedback) {
+  void _onShiftTap(KeyboardSettings settings) {
+    if (settings.hapticFeedback) {
       KeyboardController.vibrate();
     }
 
@@ -292,23 +293,23 @@ class _KeyboardWidgetState extends State<KeyboardWidget> {
     });
   }
 
-  void _toggleLanguage() {
-    if (_settings.hapticFeedback) {
+  void _toggleLanguage(KeyboardSettings settings) {
+    if (settings.hapticFeedback) {
       KeyboardController.vibrate();
     }
 
     _commitBuffer();
 
     setState(() {
-      final currentIndex = _currentLanguage.index;
-      final nextIndex = (currentIndex + 1) % KeyboardLanguage.values.length;
+      final nextIndex =
+          (_currentLanguage.index + 1) % KeyboardLanguage.values.length;
       _currentLanguage = KeyboardLanguage.values[nextIndex];
       _showSymbols = false;
     });
   }
 
-  void _toggleSymbols() {
-    if (_settings.hapticFeedback) {
+  void _toggleSymbols(KeyboardSettings settings) {
+    if (settings.hapticFeedback) {
       KeyboardController.vibrate();
     }
 
@@ -321,123 +322,142 @@ class _KeyboardWidgetState extends State<KeyboardWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final width = size.width > 0 ? size.width : 360.0;
+    // ✅ Watch settings from Riverpod (rebuilds on change)
+    final settings = ref.watch(settingsProvider);
 
-    final horizontalPadding = 8.0;
-    final keyPadding = 4.0;
-    final maxKeysPerRow = 10.0;
+    // ✅ Get theme from current settings
+    final theme = KeyboardTheme.fromName(settings.themeName);
 
-    final keyWidth =
-        (width - horizontalPadding - (maxKeysPerRow * keyPadding)) /
-        maxKeysPerRow;
     final fontFamily = _currentLanguage.fontFamily;
 
-    // Calculate what's visible
-    final bool hasPreview =
+    final hasPreview =
         _inputBuffer.isNotEmpty && _currentLanguage != KeyboardLanguage.english;
-    final bool hasSuggestions =
-        _settings.showSuggestions &&
+    final hasSuggestions =
+        settings.showSuggestions &&
         (_customSuggestions.isNotEmpty ||
             _transliteratedSuggestions.isNotEmpty);
-    final bool hasNumberRow = _settings.showNumberRow && !_showSymbols;
-
-    // Dynamic key height calculation
-    final double baseKeyHeight = _settings.keyHeight;
-    final double adjustedKeyHeight = _getAdjustedKeyHeight(
-      baseHeight: baseKeyHeight,
-      hasPreview: hasPreview,
-      hasSuggestions: hasSuggestions,
-      hasNumberRow: hasNumberRow,
-    );
+    final hasNumberRow = settings.showNumberRow && !_showSymbols;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        return SingleChildScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: constraints.maxHeight),
-            child: Container(
-              color: _theme.backgroundColor,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Preview bar
-                  if (hasPreview) _buildPreviewBar(fontFamily),
+        final width = constraints.maxWidth > 0 ? constraints.maxWidth : 360.0;
 
-                  // Suggestion bar
-                  if (hasSuggestions) _buildSuggestionBar(fontFamily),
+        final gap = settings.keySpacing;
+        const horizontalPadding = 4.0;
+        const maxKeys = 10;
 
-                  // Keyboard content
-                  Flexible(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(height: 2),
+        final keyWidth =
+            ((width - (horizontalPadding * 2) - (gap * (maxKeys - 1))) /
+                    maxKeys)
+                .clamp(24.0, 80.0);
 
-                        // Number row
-                        if (hasNumberRow)
-                          _buildNumberRow(keyWidth, adjustedKeyHeight),
+        final isLandscape =
+            MediaQuery.of(context).size.width >
+            MediaQuery.of(context).size.height;
+        final baseKeyHeight = isLandscape
+            ? settings.keyHeight * 0.85
+            : settings.keyHeight;
 
-                        // Letter/Symbol rows
-                        ..._buildKeyRows(
-                          keyWidth,
-                          adjustedKeyHeight,
-                          fontFamily,
-                        ),
+        final screenHeight = MediaQuery.of(context).size.height;
+        final adjustedKeyHeight = _getAdjustedKeyHeight(
+          screenHeight: screenHeight,
+          baseHeight: baseKeyHeight,
+          hasPreview: hasPreview,
+          hasSuggestions: hasSuggestions,
+          hasNumberRow: hasNumberRow,
+        );
 
-                        // Bottom row
-                        _buildBottomRow(
-                          keyWidth,
-                          adjustedKeyHeight,
-                          fontFamily,
-                        ),
-
-                        const SizedBox(height: 4),
-                      ],
+        return Container(
+          color: theme.backgroundColor,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (hasPreview) _buildPreviewBar(theme, fontFamily),
+              if (hasSuggestions)
+                _buildSuggestionBar(settings, theme, fontFamily),
+              Flexible(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 2),
+                    if (hasNumberRow)
+                      _buildNumberRow(
+                        settings,
+                        theme,
+                        keyWidth,
+                        adjustedKeyHeight,
+                      ),
+                    ..._buildKeyRows(
+                      settings,
+                      theme,
+                      keyWidth,
+                      adjustedKeyHeight,
+                      fontFamily,
                     ),
-                  ),
-                ],
+                    _buildBottomRow(
+                      settings,
+                      theme,
+                      keyWidth,
+                      adjustedKeyHeight,
+                      fontFamily,
+                    ),
+                    const SizedBox(height: 4),
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
         );
       },
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // HELPER METHODS
-  // ═══════════════════════════════════════════════════════════════════════════
-
   double _getAdjustedKeyHeight({
+    required double screenHeight,
     required double baseHeight,
     required bool hasPreview,
     required bool hasSuggestions,
     required bool hasNumberRow,
   }) {
-    double reduction = 0;
+    final maxKeyboardHeight = screenHeight * 0.40;
 
-    if (hasPreview) reduction += 6;
-    if (hasSuggestions) reduction += 6;
-    if (hasNumberRow) reduction += 2;
+    double usedHeight = 0;
+    if (hasPreview) usedHeight += 28;
+    if (hasSuggestions) usedHeight += 32;
 
-    // Clamp between 36 and 48
-    return (baseHeight - reduction).clamp(36.0, 48.0);
+    final numRows = hasNumberRow ? 5 : 4;
+    final spacing = numRows * 4 + 8;
+
+    final availableForKeys = maxKeyboardHeight - usedHeight - spacing;
+    final calculatedHeight = availableForKeys / numRows;
+
+    final lower = 36.0;
+    final upper = baseHeight;
+    final lo = lower < upper ? lower : upper;
+    final hi = upper > lower ? upper : lower;
+
+    return calculatedHeight.clamp(lo, hi);
   }
 
-  Widget _buildPreviewBar(String? fontFamily) {
+  Widget _buildPreviewBar(KeyboardTheme theme, String? fontFamily) {
+    final transliterator = TransliteratorFactory.getTransliterator(
+      _currentLanguage,
+    );
+    final preview =
+        _transliterationCache[_inputBuffer] ??
+        transliterator?.transliterate(_inputBuffer) ??
+        '';
+
     return Container(
-      width: double.infinity,
-      height: 28, // Fixed compact height
+      height: 28,
       padding: const EdgeInsets.symmetric(horizontal: 12),
-      color: _theme.keyColor,
+      color: theme.keyColor,
       child: Row(
         children: [
           Text(
             _inputBuffer,
             style: TextStyle(
-              color: _theme.textColor.withOpacity(0.5),
+              color: theme.textColor.withOpacity(0.5),
               fontSize: 11,
             ),
           ),
@@ -447,15 +467,12 @@ class _KeyboardWidgetState extends State<KeyboardWidget> {
           ),
           Expanded(
             child: Text(
-              TransliteratorFactory.getTransliterator(
-                    _currentLanguage,
-                  )?.transliterate(_inputBuffer) ??
-                  '',
+              preview,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
                 fontFamily: fontFamily,
-                color: _theme.textColor,
+                color: theme.textColor,
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
@@ -466,36 +483,51 @@ class _KeyboardWidgetState extends State<KeyboardWidget> {
     );
   }
 
-  Widget _buildSuggestionBar(String? fontFamily) {
+  Widget _buildSuggestionBar(
+    KeyboardSettings settings,
+    KeyboardTheme theme,
+    String? fontFamily,
+  ) {
     return SuggestionBar(
       suggestions: _customSuggestions,
       transliteratedSuggestions: _transliteratedSuggestions,
-      onSuggestionTap: _onSuggestionTap,
-      theme: _theme,
+      onSuggestionTap: (s) => _onSuggestionTap(s, settings),
+      theme: theme,
       fontFamily: fontFamily ?? '',
     );
   }
 
-  Widget _buildNumberRow(double keyWidth, double keyHeight) {
+  Widget _buildNumberRow(
+    KeyboardSettings settings,
+    KeyboardTheme theme,
+    double keyWidth,
+    double keyHeight,
+  ) {
+    final gap = settings.keySpacing;
+
+    final keys = KeyboardLayouts.numbers[0].map((key) {
+      return KeyButton(
+        label: key,
+        onTap: () => _onKeyTap(key, settings),
+        width: keyWidth,
+        height: keyHeight,
+        theme: theme,
+        fontSize: settings.fontSize,
+      );
+    }).toList();
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: KeyboardLayouts.numbers[0].map((key) {
-          return KeyButton(
-            label: key,
-            onTap: () => _onKeyTap(key),
-            width: keyWidth,
-            height: keyHeight,
-            theme: _theme,
-            fontSize: _settings.fontSize,
-          );
-        }).toList(),
+        children: _withGap(keys, gap),
       ),
     );
   }
 
   List<Widget> _buildKeyRows(
+    KeyboardSettings settings,
+    KeyboardTheme theme,
     double keyWidth,
     double keyHeight,
     String? fontFamily,
@@ -503,135 +535,132 @@ class _KeyboardWidgetState extends State<KeyboardWidget> {
     final rows = _showSymbols
         ? KeyboardLayouts.symbols
         : KeyboardLayouts.englishLetters;
+    final gap = settings.keySpacing;
 
     return rows.asMap().entries.map((entry) {
-      int rowIndex = entry.key;
-      List<String> row = entry.value;
+      final rowIndex = entry.key;
+      final row = entry.value;
+
+      final children = <Widget>[
+        if (!_showSymbols && rowIndex == 2)
+          KeyButton(
+            label: '',
+            icon: _isCaps ? Icons.keyboard_capslock : Icons.arrow_upward,
+            onTap: () => _onShiftTap(settings),
+            width: keyWidth * 1.5,
+            height: keyHeight,
+            theme: theme,
+            isSpecial: true,
+          ),
+        ...row.map((key) {
+          final displayKey = (_isShift || _isCaps) && !_showSymbols
+              ? key.toUpperCase()
+              : key;
+          return KeyButton(
+            label: displayKey,
+            onTap: () => _onKeyTap(key, settings),
+            width: keyWidth,
+            height: keyHeight,
+            theme: theme,
+            fontSize: settings.fontSize,
+            fontFamily: _showSymbols ? null : fontFamily,
+          );
+        }),
+        if (rowIndex == 2)
+          KeyButton(
+            label: '',
+            icon: Icons.backspace_outlined,
+            onTap: () => _onBackspaceTap(settings),
+            onLongPress: () {
+              for (int i = 0; i < 5; i++) {
+                _onBackspaceTap(settings);
+              }
+            },
+            width: keyWidth * 1.5,
+            height: keyHeight,
+            theme: theme,
+            isSpecial: true,
+          ),
+      ];
 
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Shift key on last row
-            if (!_showSymbols && rowIndex == 2)
-              KeyButton(
-                label: '',
-                icon: _isCaps ? Icons.keyboard_capslock : Icons.arrow_upward,
-                onTap: _onShiftTap,
-                width: keyWidth * 1.5,
-                height: keyHeight,
-                theme: _theme,
-                isSpecial: true,
-              ),
-
-            // Letter keys
-            ...row.map((key) {
-              String displayKey = (_isShift || _isCaps) && !_showSymbols
-                  ? key.toUpperCase()
-                  : key;
-              return KeyButton(
-                label: displayKey,
-                onTap: () => _onKeyTap(key),
-                width: keyWidth,
-                height: keyHeight,
-                theme: _theme,
-                fontSize: _settings.fontSize,
-                fontFamily: _showSymbols ? null : fontFamily,
-              );
-            }),
-
-            // Backspace on last row
-            if (rowIndex == 2)
-              KeyButton(
-                label: '',
-                icon: Icons.backspace_outlined,
-                onTap: _onBackspaceTap,
-                onLongPress: () {
-                  for (int i = 0; i < 5; i++) {
-                    _onBackspaceTap();
-                  }
-                },
-                width: keyWidth * 1.5,
-                height: keyHeight,
-                theme: _theme,
-                isSpecial: true,
-              ),
-          ],
+          children: _withGap(children, gap),
         ),
       );
     }).toList();
   }
 
   Widget _buildBottomRow(
+    KeyboardSettings settings,
+    KeyboardTheme theme,
     double keyWidth,
     double keyHeight,
     String? fontFamily,
   ) {
+    final gap = settings.keySpacing;
+
+    final children = <Widget>[
+      KeyButton(
+        label: _showSymbols ? 'ABC' : '123',
+        onTap: () => _toggleSymbols(settings),
+        width: keyWidth * 1.5,
+        height: keyHeight,
+        theme: theme,
+        isSpecial: true,
+        fontSize: 12,
+      ),
+      KeyButton(
+        label: _currentLanguage.shortName,
+        onTap: () => _toggleLanguage(settings),
+        width: keyWidth * 1.2,
+        height: keyHeight,
+        theme: theme,
+        isSpecial: true,
+        fontFamily: fontFamily,
+        fontSize: 12,
+      ),
+      KeyButton(
+        label: ',',
+        onTap: () => _onKeyTap(',', settings),
+        width: keyWidth * 0.8,
+        height: keyHeight,
+        theme: theme,
+      ),
+      KeyButton(
+        label: _currentLanguage.displayName.split(' ').last,
+        onTap: () => _onSpaceTap(settings),
+        width: keyWidth * 4,
+        height: keyHeight,
+        theme: theme,
+        fontFamily: fontFamily,
+        fontSize: 10,
+      ),
+      KeyButton(
+        label: '.',
+        onTap: () => _onKeyTap('.', settings),
+        width: keyWidth * 0.8,
+        height: keyHeight,
+        theme: theme,
+      ),
+      KeyButton(
+        label: '',
+        icon: Icons.keyboard_return,
+        onTap: () => _onEnterTap(settings),
+        width: keyWidth * 1.5,
+        height: keyHeight,
+        theme: theme,
+        isSpecial: false,
+      ),
+    ];
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          KeyButton(
-            label: _showSymbols ? 'ABC' : '123',
-            onTap: _toggleSymbols,
-            width: keyWidth * 1.5,
-            height: keyHeight,
-            theme: _theme,
-            isSpecial: true,
-            fontSize: 12,
-          ),
-          const SizedBox(width: 2),
-          KeyButton(
-            label: _currentLanguage.shortName,
-            onTap: _toggleLanguage,
-            width: keyWidth * 1.2,
-            height: keyHeight,
-            theme: _theme,
-            isSpecial: true,
-            fontFamily: fontFamily,
-            fontSize: 12,
-          ),
-          const SizedBox(width: 2),
-          KeyButton(
-            label: ',',
-            onTap: () => _onKeyTap(','),
-            width: keyWidth * 0.8,
-            height: keyHeight,
-            theme: _theme,
-          ),
-          const SizedBox(width: 2),
-          Expanded(
-            child: KeyButton(
-              label: _currentLanguage.displayName.split(' ').last,
-              onTap: _onSpaceTap,
-              width: keyWidth * 4,
-              height: keyHeight,
-              theme: _theme,
-              fontFamily: fontFamily,
-              fontSize: 10,
-            ),
-          ),
-          const SizedBox(width: 2),
-          KeyButton(
-            label: '.',
-            onTap: () => _onKeyTap('.'),
-            width: keyWidth * 0.8,
-            height: keyHeight,
-            theme: _theme,
-          ),
-          const SizedBox(width: 2),
-          KeyButton(
-            label: '',
-            icon: Icons.keyboard_return,
-            onTap: _onEnterTap,
-            width: keyWidth * 1.5,
-            height: keyHeight,
-            theme: _theme,
-            isSpecial: false,
-          ),
-        ],
+        children: _withGap(children, gap),
       ),
     );
   }

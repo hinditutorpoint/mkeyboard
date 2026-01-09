@@ -62,7 +62,7 @@ class SuggestionBar extends StatelessWidget {
         child: InkWell(
           onTap: () => onSuggestionTap(english),
           borderRadius: BorderRadius.circular(16),
-          splashColor: theme.keyPressedColor.withOpacity(0.3),
+          splashColor: theme.keyPressedColor.withValues(alpha: 0.3),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             child: Row(

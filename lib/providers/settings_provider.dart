@@ -1,134 +1,190 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import '../models/keyboard_settings.dart';
 import '../models/custom_word.dart';
 import '../services/hive_service.dart';
 
-class SettingsProvider extends ChangeNotifier {
-  KeyboardSettings _settings = KeyboardSettings();
-  List<CustomWord> _allCustomWords = [];
+/// Starts Hive init when someone watches this provider.
+/// Do NOT await it in IME startup (keep IME fast), just let it run.
+final hiveReadyProvider = FutureProvider<void>((ref) async {
+  await HiveService.ensureInitialized();
+});
 
-  KeyboardSettings get settings => _settings;
-  int get customWordsCount => _allCustomWords.length;
+// ============================
+// Settings Notifier
+// ============================
+class SettingsNotifier extends StateNotifier<KeyboardSettings> {
+  bool _alive = true;
 
-  SettingsProvider() {
-    _loadData();
+  SettingsNotifier() : super(KeyboardSettings()) {
+    // SAFE immediate read (must not crash even if Hive not ready)
+    state = HiveService.getSettings();
+
+    // Refresh once Hive is actually ready
+    HiveService.ensureInitialized()
+        .then((_) {
+          if (_alive) {
+            state = HiveService.getSettings();
+          }
+        })
+        .catchError((e) {
+          debugPrint('SettingsNotifier: Hive init failed: $e');
+        });
   }
 
-  void _loadData() {
-    _settings = HiveService.getSettings();
-    _allCustomWords = HiveService.getAllCustomWords();
-    notifyListeners();
+  @override
+  void dispose() {
+    _alive = false;
+    super.dispose();
   }
 
-  // Settings methods
+  Future<void> reloadFromHive() async {
+    if (!_alive) return;
+    state = HiveService.getSettings();
+  }
+
   Future<void> setHapticFeedback(bool value) async {
-    _settings = _settings.copyWith(hapticFeedback: value);
-    await HiveService.saveSettings(_settings);
-    notifyListeners();
+    final s = state.copyWith(hapticFeedback: value);
+    state = s;
+    await HiveService.saveSettings(s);
   }
 
   Future<void> setSoundOnKeyPress(bool value) async {
-    _settings = _settings.copyWith(soundOnKeyPress: value);
-    await HiveService.saveSettings(_settings);
-    notifyListeners();
+    final s = state.copyWith(soundOnKeyPress: value);
+    state = s;
+    await HiveService.saveSettings(s);
   }
 
   Future<void> setShowSuggestions(bool value) async {
-    _settings = _settings.copyWith(showSuggestions: value);
-    await HiveService.saveSettings(_settings);
-    notifyListeners();
+    final s = state.copyWith(showSuggestions: value);
+    state = s;
+    await HiveService.saveSettings(s);
   }
 
   Future<void> setAutoCapitalize(bool value) async {
-    _settings = _settings.copyWith(autoCapitalize: value);
-    await HiveService.saveSettings(_settings);
-    notifyListeners();
+    final s = state.copyWith(autoCapitalize: value);
+    state = s;
+    await HiveService.saveSettings(s);
   }
 
   Future<void> setShowNumberRow(bool value) async {
-    _settings = _settings.copyWith(showNumberRow: value);
-    await HiveService.saveSettings(_settings);
-    notifyListeners();
+    final s = state.copyWith(showNumberRow: value);
+    state = s;
+    await HiveService.saveSettings(s);
   }
 
   Future<void> setKeyHeight(double value) async {
-    _settings = _settings.copyWith(keyHeight: value);
-    await HiveService.saveSettings(_settings);
-    notifyListeners();
+    final s = state.copyWith(keyHeight: value);
+    state = s;
+    await HiveService.saveSettings(s);
   }
 
   Future<void> setFontSize(double value) async {
-    _settings = _settings.copyWith(fontSize: value);
-    await HiveService.saveSettings(_settings);
-    notifyListeners();
+    final s = state.copyWith(fontSize: value);
+    state = s;
+    await HiveService.saveSettings(s);
   }
 
   Future<void> setThemeName(String value) async {
-    _settings = _settings.copyWith(themeName: value);
-    await HiveService.saveSettings(_settings);
-    notifyListeners();
+    final s = state.copyWith(themeName: value);
+    state = s;
+    await HiveService.saveSettings(s);
   }
 
   Future<void> setDefaultLanguage(int value) async {
-    _settings = _settings.copyWith(defaultLanguageIndex: value);
-    await HiveService.saveSettings(_settings);
-    notifyListeners();
+    final s = state.copyWith(defaultLanguageIndex: value);
+    state = s;
+    await HiveService.saveSettings(s);
   }
 
   Future<void> setSwipeToDelete(bool value) async {
-    _settings = _settings.copyWith(swipeToDelete: value);
-    await HiveService.saveSettings(_settings);
-    notifyListeners();
+    final s = state.copyWith(swipeToDelete: value);
+    state = s;
+    await HiveService.saveSettings(s);
   }
 
   Future<void> setLongPressForSymbols(bool value) async {
-    _settings = _settings.copyWith(longPressForSymbols: value);
-    await HiveService.saveSettings(_settings);
-    notifyListeners();
+    final s = state.copyWith(longPressForSymbols: value);
+    state = s;
+    await HiveService.saveSettings(s);
   }
 
   Future<void> setSuggestionCount(int value) async {
-    _settings = _settings.copyWith(suggestionCount: value);
-    await HiveService.saveSettings(_settings);
-    notifyListeners();
+    final s = state.copyWith(suggestionCount: value);
+    state = s;
+    await HiveService.saveSettings(s);
   }
 
   Future<void> setShowPreview(bool value) async {
-    _settings = _settings.copyWith(showPreview: value);
-    await HiveService.saveSettings(_settings);
-    notifyListeners();
+    final s = state.copyWith(showPreview: value);
+    state = s;
+    await HiveService.saveSettings(s);
   }
 
   Future<void> setKeySpacing(double value) async {
-    _settings = _settings.copyWith(keySpacing: value);
-    await HiveService.saveSettings(_settings);
-    notifyListeners();
+    final s = state.copyWith(keySpacing: value);
+    state = s;
+    await HiveService.saveSettings(s);
   }
 
   Future<void> setEnableGlideTyping(bool value) async {
-    _settings = _settings.copyWith(enableGlideTyping: value);
-    await HiveService.saveSettings(_settings);
-    notifyListeners();
+    final s = state.copyWith(enableGlideTyping: value);
+    state = s;
+    await HiveService.saveSettings(s);
   }
 
   Future<void> resetSettings() async {
-    _settings = KeyboardSettings();
-    await HiveService.saveSettings(_settings);
-    notifyListeners();
+    final s = KeyboardSettings();
+    state = s;
+    await HiveService.saveSettings(s);
+  }
+}
+
+// Settings provider (also triggers hiveReadyProvider so init starts)
+final settingsProvider =
+    StateNotifierProvider<SettingsNotifier, KeyboardSettings>((ref) {
+      ref.watch(hiveReadyProvider); // kick init
+      return SettingsNotifier();
+    });
+
+// ============================
+// Custom Words Notifier
+// ============================
+class CustomWordsNotifier extends StateNotifier<AsyncValue<List<CustomWord>>> {
+  bool _alive = true;
+
+  CustomWordsNotifier() : super(const AsyncValue.loading()) {
+    // Load once Hive is ready
+    HiveService.ensureInitialized()
+        .then((_) {
+          if (_alive) {
+            _loadCustomWords();
+          }
+        })
+        .catchError((e) {
+          if (_alive) {
+            state = AsyncValue.error(e, StackTrace.current);
+          }
+        });
   }
 
-  // Custom Words methods
-  List<CustomWord> getAllCustomWords() {
-    return HiveService.getAllCustomWords();
+  @override
+  void dispose() {
+    _alive = false;
+    super.dispose();
   }
 
-  List<CustomWord> getCustomWordsByLanguage(int languageIndex) {
-    return HiveService.getAllCustomWords(languageIndex: languageIndex);
+  Future<void> _loadCustomWords() async {
+    try {
+      final words = HiveService.getAllCustomWords();
+      if (_alive) state = AsyncValue.data(words);
+    } catch (e, st) {
+      if (_alive) state = AsyncValue.error(e, st);
+    }
   }
 
-  List<CustomWord> searchCustomWords(String query, {int? languageIndex}) {
-    return HiveService.searchCustomWords(query, languageIndex: languageIndex);
-  }
+  Future<void> refresh() async => _loadCustomWords();
 
   Future<bool> addCustomWord(
     String english,
@@ -144,10 +200,10 @@ class SettingsProvider extends ChangeNotifier {
           createdAt: DateTime.now(),
         ),
       );
-      _allCustomWords = HiveService.getAllCustomWords();
-      notifyListeners();
+      await _loadCustomWords();
       return true;
     } catch (e) {
+      debugPrint('Error adding custom word: $e');
       return false;
     }
   }
@@ -157,38 +213,112 @@ class SettingsProvider extends ChangeNotifier {
     String newEnglish,
     String newTranslated,
   ) async {
-    final index = _allCustomWords.indexOf(word);
-    if (index != -1) {
-      await HiveService.updateCustomWord(
-        index,
-        word.copyWith(
-          englishWord: newEnglish.trim().toLowerCase(),
-          translatedWord: newTranslated.trim(),
-        ),
+    try {
+      final words = state.maybeWhen(
+        data: (w) => w,
+        orElse: () => <CustomWord>[],
       );
-      _allCustomWords = HiveService.getAllCustomWords();
-      notifyListeners();
+      final index = words.indexOf(word);
+      if (index != -1) {
+        await HiveService.updateCustomWord(
+          index,
+          word.copyWith(
+            englishWord: newEnglish.trim().toLowerCase(),
+            translatedWord: newTranslated.trim(),
+          ),
+        );
+        await _loadCustomWords();
+      }
+    } catch (e) {
+      debugPrint('Error updating custom word: $e');
     }
   }
 
   Future<void> deleteCustomWord(CustomWord word) async {
-    final index = _allCustomWords.indexOf(word);
-    if (index != -1) {
-      await HiveService.deleteCustomWord(index);
-      _allCustomWords = HiveService.getAllCustomWords();
-      notifyListeners();
+    try {
+      final words = state.maybeWhen(
+        data: (w) => w,
+        orElse: () => <CustomWord>[],
+      );
+      final index = words.indexOf(word);
+      if (index != -1) {
+        await HiveService.deleteCustomWord(index);
+        await _loadCustomWords();
+      }
+    } catch (e) {
+      debugPrint('Error deleting custom word: $e');
     }
   }
 
   Future<void> togglePinned(CustomWord word) async {
-    await HiveService.togglePinned(word);
-    _allCustomWords = HiveService.getAllCustomWords();
-    notifyListeners();
+    try {
+      await HiveService.togglePinned(word);
+      await _loadCustomWords();
+    } catch (e) {
+      debugPrint('Error toggling pinned: $e');
+    }
   }
 
-  Future<void> clearAllCustomWords() async {
-    await HiveService.clearAllCustomWords();
-    _allCustomWords = HiveService.getAllCustomWords();
-    notifyListeners();
+  Future<void> clearAll() async {
+    try {
+      await HiveService.clearAllCustomWords();
+      await _loadCustomWords();
+    } catch (e) {
+      debugPrint('Error clearing all: $e');
+    }
+  }
+
+  List<CustomWord> getAllWords() {
+    try {
+      return state.maybeWhen(data: (w) => w, orElse: () => []);
+    } catch (_) {
+      return [];
+    }
   }
 }
+
+// Custom words provider (also triggers hiveReadyProvider so init starts)
+final customWordsProvider =
+    StateNotifierProvider<CustomWordsNotifier, AsyncValue<List<CustomWord>>>((
+      ref,
+    ) {
+      ref.watch(hiveReadyProvider); // kick init
+      return CustomWordsNotifier();
+    });
+
+// Derived providers
+final allCustomWordsProvider = Provider<List<CustomWord>>((ref) {
+  final customWords = ref.watch(customWordsProvider);
+  return customWords.maybeWhen(data: (w) => w, orElse: () => const []);
+});
+
+final customWordsByLanguageProvider = Provider.family<List<CustomWord>, int>((
+  ref,
+  languageIndex,
+) {
+  final words = ref.watch(allCustomWordsProvider);
+  return words.where((w) => w.languageIndex == languageIndex).toList();
+});
+
+final searchCustomWordsProvider =
+    Provider.family<List<CustomWord>, (String, int?)>((ref, params) {
+      final query = params.$1;
+      final languageIndex = params.$2;
+      final words = ref.watch(allCustomWordsProvider);
+
+      if (query.isEmpty) {
+        return languageIndex == null
+            ? words
+            : words.where((w) => w.languageIndex == languageIndex).toList();
+      }
+
+      final q = query.toLowerCase();
+      return words.where((w) {
+        final matchesLanguage =
+            languageIndex == null || w.languageIndex == languageIndex;
+        final matchesQuery =
+            w.englishWord.toLowerCase().contains(q) ||
+            w.translatedWord.contains(query);
+        return matchesLanguage && matchesQuery;
+      }).toList();
+    });

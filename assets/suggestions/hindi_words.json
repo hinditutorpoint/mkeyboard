@@ -1,0 +1,76 @@
+[
+    {
+        "english": "namaste",
+        "translated": "नमस्ते",
+        "frequency": 100,
+        "alternatives": [
+            "namastey"
+        ]
+    },
+    {
+        "english": "dhanyavaad",
+        "translated": "धन्यवाद",
+        "frequency": 95,
+        "alternatives": [
+            "dhanyawad"
+        ]
+    },
+    {
+        "english": "aap",
+        "translated": "आप",
+        "frequency": 90,
+        "alternatives": [
+            "ap"
+        ]
+    },
+    {
+        "english": "kya",
+        "translated": "क्या",
+        "frequency": 85,
+        "alternatives": []
+    },
+    {
+        "english": "hai",
+        "translated": "है",
+        "frequency": 100,
+        "alternatives": []
+    },
+    {
+        "english": "meraa",
+        "translated": "मेरा",
+        "frequency": 88,
+        "alternatives": [
+            "mera"
+        ]
+    },
+    {
+        "english": "naama",
+        "translated": "नाम",
+        "frequency": 85,
+        "alternatives": [
+            "naam"
+        ]
+    },
+    {
+        "english": "rajesha",
+        "translated": "राजेश",
+        "frequency": 80,
+        "alternatives": [
+            "rajesh"
+        ]
+    },
+    {
+        "english": "kumaara",
+        "translated": "कुमार",
+        "frequency": 82,
+        "alternatives": [
+            "kumar"
+        ]
+    },
+    {
+        "english": "dhuriyaa",
+        "translated": "धुरिया",
+        "frequency": 78,
+        "alternatives": []
+    }
+]

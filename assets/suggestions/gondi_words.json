@@ -1,0 +1,64 @@
+[
+    {
+        "english": "jokhar",
+        "translated": "𑴓𑴹𑴌𑴬𑴱𑴦",
+        "frequency": 100,
+        "alternatives": [
+            "jokar"
+        ]
+    },
+    {
+        "english": "namaskar",
+        "translated": "𑴟𑴱𑴤𑴱𑴪𑴌𑴱𑴦",
+        "frequency": 95,
+        "alternatives": []
+    },
+    {
+        "english": "aap",
+        "translated": "𑴀𑴱𑴠",
+        "frequency": 90,
+        "alternatives": []
+    },
+    {
+        "english": "kya",
+        "translated": "𑴌𑵅𑴥𑴱",
+        "frequency": 85,
+        "alternatives": []
+    },
+    {
+        "english": "hai",
+        "translated": "𑴬𑴼",
+        "frequency": 100,
+        "alternatives": []
+    },
+    {
+        "english": "meraa",
+        "translated": "𑴤𑴺𑴦𑴱",
+        "frequency": 88,
+        "alternatives": []
+    },
+    {
+        "english": "naama",
+        "translated": "𑴟𑴱𑴤",
+        "frequency": 85,
+        "alternatives": []
+    },
+    {
+        "english": "rajesha",
+        "translated": "𑴦𑴱𑴓𑴺𑴩",
+        "frequency": 80,
+        "alternatives": []
+    },
+    {
+        "english": "kumaara",
+        "translated": "𑴌𑴴𑴤𑴱𑴦",
+        "frequency": 82,
+        "alternatives": []
+    },
+    {
+        "english": "dhuriyaa",
+        "translated": "𑴞𑴴𑴦𑴲𑴥𑴱",
+        "frequency": 78,
+        "alternatives": []
+    }
+]

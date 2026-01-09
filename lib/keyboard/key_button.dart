@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/keyboard_theme.dart';
 
-class KeyButton extends StatefulWidget {
+class KeyButton extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
@@ -28,107 +28,36 @@ class KeyButton extends StatefulWidget {
   });
 
   @override
-  State<KeyButton> createState() => _KeyButtonState();
-}
-
-class _KeyButtonState extends State<KeyButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _opacityAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 150),
-      vsync: this,
-    );
-
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.92,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-
-    _opacityAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.7,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _handleTapDown(TapDownDetails details) {
-    _controller.forward();
-  }
-
-  void _handleTapUp(TapUpDetails details) {
-    _controller.reverse();
-    widget.onTap?.call();
-  }
-
-  void _handleTapCancel() {
-    _controller.reverse();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final color = widget.isSpecial
-        ? widget.theme.specialKeyColor
-        : widget.theme.keyColor;
+    final color = isSpecial ? theme.specialKeyColor : theme.keyColor;
 
-    return Padding(
-      padding: const EdgeInsets.all(2),
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: Opacity(opacity: _opacityAnimation.value, child: child),
-          );
-        },
-        child: Material(
-          color: color,
-          borderRadius: BorderRadius.circular(widget.theme.keyRadius),
-          elevation: widget.theme.keyElevation,
-          shadowColor: Colors.black38,
-          child: InkWell(
-            onTapDown: _handleTapDown,
-            onTapUp: _handleTapUp,
-            onTapCancel: _handleTapCancel,
-            onLongPress: widget.onLongPress,
-            borderRadius: BorderRadius.circular(widget.theme.keyRadius),
-            // Enhanced ripple colors
-            splashColor: widget.theme.keyPressedColor.withOpacity(0.5),
-            highlightColor: widget.theme.keyPressedColor.withOpacity(0.3),
-            splashFactory: InkRipple.splashFactory,
-            radius: widget.width * 0.6, // Control ripple size
-            child: Ink(
-              width: widget.width,
-              height: widget.height,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(widget.theme.keyRadius),
-              ),
-              child: Center(
-                child: widget.icon != null
-                    ? Icon(widget.icon, size: 20, color: widget.theme.textColor)
-                    : Text(
-                        widget.label,
-                        style: TextStyle(
-                          fontSize: widget.fontSize ?? 18,
-                          color: widget.theme.textColor,
-                          fontFamily: widget.fontFamily,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-              ),
-            ),
+    return Material(
+      color: color,
+      borderRadius: BorderRadius.circular(theme.keyRadius),
+      elevation: theme.keyElevation,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        borderRadius: BorderRadius.circular(theme.keyRadius),
+        splashColor: theme.keyPressedColor.withValues(alpha: 0.4),
+        highlightColor: theme.keyPressedColor.withValues(alpha: 0.2),
+        child: SizedBox(
+          width: width,
+          height: height,
+          child: Center(
+            child: icon != null
+                ? Icon(icon, size: 20, color: theme.textColor)
+                : Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: fontSize ?? 18,
+                      color: theme.textColor,
+                      fontFamily: fontFamily,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
           ),
         ),
       ),

@@ -7,123 +7,155 @@ class HiveService {
   static const String customWordsBoxName = 'custom_words';
   static const String usageStatsBoxName = 'usage_stats';
 
-  static late Box<KeyboardSettings> settingsBox;
-  static late Box<CustomWord> customWordsBox;
-  static late Box<dynamic> usageStatsBox;
+  static late Box<KeyboardSettings> _settingsBox;
+  static late Box<CustomWord> _customWordsBox;
+  static late Box<dynamic> _usageStatsBox;
+
+  static Future<void>? _initFuture;
+
+  static bool get isReady => true;
+
+  /// Safe: can be called multiple times; will only init once.
+  /// If init fails, it resets so you can retry.
+  static Future<void> ensureInitialized() {
+    final existing = _initFuture;
+    if (existing != null) return existing;
+
+    _initFuture = init().catchError((e, st) {
+      _initFuture = null;
+      throw e;
+    });
+
+    return _initFuture!;
+  }
 
   static Future<void> init() async {
     await Hive.initFlutter();
 
-    // Register adapters
-    Hive.registerAdapter(KeyboardSettingsAdapter());
-    Hive.registerAdapter(CustomWordAdapter());
-
-    // Open boxes
-    settingsBox = await Hive.openBox<KeyboardSettings>(settingsBoxName);
-    customWordsBox = await Hive.openBox<CustomWord>(customWordsBoxName);
-    usageStatsBox = await Hive.openBox(usageStatsBoxName);
-
-    // Initialize defaults
-    if (settingsBox.isEmpty) {
-      await settingsBox.put('settings', KeyboardSettings());
+    // Register adapters only once
+    if (!Hive.isAdapterRegistered(0)) {
+      Hive.registerAdapter(KeyboardSettingsAdapter());
+    }
+    if (!Hive.isAdapterRegistered(1)) {
+      Hive.registerAdapter(CustomWordAdapter());
     }
 
-    if (customWordsBox.isEmpty) {
+    _settingsBox = Hive.isBoxOpen(settingsBoxName)
+        ? Hive.box<KeyboardSettings>(settingsBoxName)
+        : await Hive.openBox<KeyboardSettings>(settingsBoxName);
+
+    _customWordsBox = Hive.isBoxOpen(customWordsBoxName)
+        ? Hive.box<CustomWord>(customWordsBoxName)
+        : await Hive.openBox<CustomWord>(customWordsBoxName);
+
+    _usageStatsBox = Hive.isBoxOpen(usageStatsBoxName)
+        ? Hive.box(usageStatsBoxName)
+        : await Hive.openBox(usageStatsBoxName);
+
+    // Defaults
+    if (_settingsBox.get('settings') == null) {
+      await _settingsBox.put('settings', KeyboardSettings());
+    }
+
+    if (_customWordsBox.isEmpty) {
       await _addDefaultWords();
     }
   }
 
   static Future<void> _addDefaultWords() async {
-    // Hindi words
+    final box = _customWordsBox;
+
+    // keep it small so IME boot stays fast
     final hindiWords = {
       'namaste': 'नमस्ते',
-      'namaskar': 'नमस्कार',
       'dhanyavaad': 'धन्यवाद',
-      'shukriya': 'शुक्रिया',
       'kaise ho': 'कैसे हो',
-      'theek hoon': 'ठीक हूं',
-      'aapka naam': 'आपका नाम',
       'mera naam': 'मेरा नाम',
-      'shubh prabhat': 'शुभ प्रभात',
-      'shubh ratri': 'शुभ रात्रि',
-      'alvida': 'अलविदा',
-      'phir milenge': 'फिर मिलेंगे',
     };
 
-    for (var entry in hindiWords.entries) {
-      await customWordsBox.add(
+    for (final entry in hindiWords.entries) {
+      await box.add(
         CustomWord(
           englishWord: entry.key,
           translatedWord: entry.value,
-          languageIndex: 1, // Hindi
+          languageIndex: 1,
           createdAt: DateTime.now(),
         ),
       );
     }
 
-    // Gondi words (basic greetings)
     final gondiWords = {
-      'jokhar': '𑴕𑴽𑴎𑴦𑴢', // Hello/Greetings
-      'namaskar': '𑴕𑴽𑴎𑴦𑴢 𑴦𑴛𑴧𑴘𑴦𑴢',
-      'dhanyavaad': '𑴘𑴟𑴤𑴳𑴮𑴦𑴘', // Thank you
-      'aap': '𑴀𑴦𑴧', // You
-      'main': '𑴋𑴦𑴤', // I
-      'naam': '𑴕𑴦𑴋', // Name
+      'jokhar': '𑴕𑴽𑴎𑴦𑴢',
+      'dhanyavaad': '𑴘𑴟𑴤𑴳𑴮𑴦𑴘',
+      'naam': '𑴕𑴦𑴋',
     };
 
-    for (var entry in gondiWords.entries) {
-      await customWordsBox.add(
+    for (final entry in gondiWords.entries) {
+      await box.add(
         CustomWord(
           englishWord: entry.key,
           translatedWord: entry.value,
-          languageIndex: 2, // Gondi
+          languageIndex: 2,
           createdAt: DateTime.now(),
         ),
       );
     }
   }
 
-  // Settings CRUD
+  // =========================
+  // SAFE SYNC READS (no crash before init)
+  // =========================
+
   static KeyboardSettings getSettings() {
-    return settingsBox.get('settings') ?? KeyboardSettings();
-  }
-
-  static Future<void> saveSettings(KeyboardSettings settings) async {
-    await settingsBox.put('settings', settings);
-  }
-
-  // Custom Words CRUD
-  static List<CustomWord> getAllCustomWords({int? languageIndex}) {
-    if (languageIndex == null) {
-      return customWordsBox.values.toList()..sort((a, b) {
-        if (a.isPinned != b.isPinned) return a.isPinned ? -1 : 1;
-        return b.usageCount.compareTo(a.usageCount);
-      });
+    try {
+      return _settingsBox.get('settings') ?? KeyboardSettings();
+    } catch (_) {
+      return KeyboardSettings();
     }
+  }
 
-    return customWordsBox.values
-        .where((word) => word.languageIndex == languageIndex)
-        .toList()
-      ..sort((a, b) {
-        if (a.isPinned != b.isPinned) return a.isPinned ? -1 : 1;
-        return b.usageCount.compareTo(a.usageCount);
-      });
+  static List<CustomWord> getAllCustomWords({int? languageIndex}) {
+    try {
+      Iterable<CustomWord> words = _customWordsBox.values;
+      if (languageIndex != null) {
+        words = words.where((w) => w.languageIndex == languageIndex);
+      }
+
+      final list = words.toList()
+        ..sort((a, b) {
+          if (a.isPinned != b.isPinned) return a.isPinned ? -1 : 1;
+          return b.usageCount.compareTo(a.usageCount);
+        });
+
+      return list;
+    } catch (_) {
+      return [];
+    }
   }
 
   static List<CustomWord> searchCustomWords(
     String query, {
     int? languageIndex,
   }) {
-    if (query.isEmpty) return getAllCustomWords(languageIndex: languageIndex);
+    try {
+      final all = getAllCustomWords(languageIndex: languageIndex);
+      if (query.isEmpty) return all;
 
-    return customWordsBox.values.where((word) {
-      final matchesLanguage =
-          languageIndex == null || word.languageIndex == languageIndex;
-      final matchesQuery =
-          word.englishWord.toLowerCase().contains(query.toLowerCase()) ||
-          word.translatedWord.contains(query);
-      return matchesLanguage && matchesQuery;
-    }).toList()..sort((a, b) => b.usageCount.compareTo(a.usageCount));
+      final q = query.toLowerCase();
+      final list =
+          all
+              .where(
+                (w) =>
+                    w.englishWord.toLowerCase().contains(q) ||
+                    w.translatedWord.contains(query),
+              )
+              .toList()
+            ..sort((a, b) => b.usageCount.compareTo(a.usageCount));
+
+      return list;
+    } catch (_) {
+      return [];
+    }
   }
 
   static List<CustomWord> getSuggestions(
@@ -131,24 +163,76 @@ class HiveService {
     int languageIndex, {
     int limit = 5,
   }) {
-    if (input.isEmpty) return [];
+    try {
+      if (input.isEmpty) return [];
+      final lastWord = input.split(' ').last.toLowerCase();
+      if (lastWord.isEmpty) return [];
 
-    final lastWord = input.split(' ').last.toLowerCase();
-    if (lastWord.isEmpty) return [];
+      final box = _customWordsBox;
 
-    return customWordsBox.values
-        .where(
-          (word) =>
-              word.languageIndex == languageIndex &&
-              word.englishWord.toLowerCase().startsWith(lastWord),
-        )
-        .take(limit)
-        .toList();
+      return box.values
+          .where(
+            (w) =>
+                w.languageIndex == languageIndex &&
+                w.englishWord.toLowerCase().startsWith(lastWord),
+          )
+          .take(limit)
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  static int getTotalKeyPresses() {
+    try {
+      final box = _usageStatsBox;
+
+      int total = 0;
+      for (final key in box.keys) {
+        if (key.toString().startsWith('keypress_')) {
+          total += (box.get(key) as int?) ?? 0;
+        }
+      }
+      return total;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  static Map<String, int> getTopKeys({int limit = 10}) {
+    try {
+      final box = _usageStatsBox;
+
+      final keyPresses = <String, int>{};
+      for (final key in box.keys) {
+        if (key.toString().startsWith('keypress_')) {
+          final keyName = key.toString().replaceFirst('keypress_', '');
+          keyPresses[keyName] = (box.get(key) as int?) ?? 0;
+        }
+      }
+
+      final sorted = keyPresses.entries.toList()
+        ..sort((a, b) => b.value.compareTo(a.value));
+
+      return Map.fromEntries(sorted.take(limit));
+    } catch (_) {
+      return {};
+    }
+  }
+
+  // =========================
+  // ASYNC WRITES (ensure init first)
+  // =========================
+
+  static Future<void> saveSettings(KeyboardSettings settings) async {
+    await ensureInitialized();
+    await _settingsBox.put('settings', settings);
   }
 
   static Future<int> addCustomWord(CustomWord word) async {
-    // Check for duplicate
-    final existing = customWordsBox.values.firstWhere(
+    await ensureInitialized();
+
+    final existing = _customWordsBox.values.firstWhere(
       (w) =>
           w.englishWord.toLowerCase() == word.englishWord.toLowerCase() &&
           w.languageIndex == word.languageIndex,
@@ -164,21 +248,25 @@ class HiveService {
       throw Exception('Word already exists');
     }
 
-    return await customWordsBox.add(word);
+    return _customWordsBox.add(word);
   }
 
   static Future<void> updateCustomWord(int index, CustomWord word) async {
-    await customWordsBox.putAt(index, word);
+    await ensureInitialized();
+    await _customWordsBox.putAt(index, word);
   }
 
   static Future<void> deleteCustomWord(int index) async {
-    await customWordsBox.deleteAt(index);
+    await ensureInitialized();
+    await _customWordsBox.deleteAt(index);
   }
 
   static Future<void> incrementWordUsage(CustomWord word) async {
-    final index = customWordsBox.values.toList().indexOf(word);
+    await ensureInitialized();
+    final list = _customWordsBox.values.toList();
+    final index = list.indexOf(word);
     if (index != -1) {
-      await customWordsBox.putAt(
+      await _customWordsBox.putAt(
         index,
         word.copyWith(
           usageCount: word.usageCount + 1,
@@ -189,9 +277,11 @@ class HiveService {
   }
 
   static Future<void> togglePinned(CustomWord word) async {
-    final index = customWordsBox.values.toList().indexOf(word);
+    await ensureInitialized();
+    final list = _customWordsBox.values.toList();
+    final index = list.indexOf(word);
     if (index != -1) {
-      await customWordsBox.putAt(
+      await _customWordsBox.putAt(
         index,
         word.copyWith(isPinned: !word.isPinned),
       );
@@ -199,39 +289,14 @@ class HiveService {
   }
 
   static Future<void> clearAllCustomWords() async {
-    await customWordsBox.clear();
+    await ensureInitialized();
+    await _customWordsBox.clear();
     await _addDefaultWords();
   }
 
-  // Usage Statistics
   static Future<void> recordKeyPress(String key) async {
-    final count = usageStatsBox.get('keypress_$key', defaultValue: 0) as int;
-    await usageStatsBox.put('keypress_$key', count + 1);
-  }
-
-  static int getTotalKeyPresses() {
-    int total = 0;
-    for (var key in usageStatsBox.keys) {
-      if (key.toString().startsWith('keypress_')) {
-        total += usageStatsBox.get(key) as int;
-      }
-    }
-    return total;
-  }
-
-  static Map<String, int> getTopKeys({int limit = 10}) {
-    final keyPresses = <String, int>{};
-
-    for (var key in usageStatsBox.keys) {
-      if (key.toString().startsWith('keypress_')) {
-        final keyName = key.toString().replaceFirst('keypress_', '');
-        keyPresses[keyName] = usageStatsBox.get(key) as int;
-      }
-    }
-
-    final sorted = keyPresses.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-
-    return Map.fromEntries(sorted.take(limit));
+    await ensureInitialized();
+    final count = (_usageStatsBox.get('keypress_$key') as int?) ?? 0;
+    await _usageStatsBox.put('keypress_$key', count + 1);
   }
 }

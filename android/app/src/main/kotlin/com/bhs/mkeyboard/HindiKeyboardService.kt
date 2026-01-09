@@ -1,6 +1,7 @@
 package com.bhs.mkeyboard
 
 import android.content.Context
+import android.content.res.Configuration
 import android.inputmethodservice.InputMethodService
 import android.os.Build
 import android.os.VibrationEffect
@@ -66,25 +67,28 @@ class HindiKeyboardService : InputMethodService() {
     }
 
     override fun onCreateInputView(): View {
-        // 1. Force the Service Window to be transparent
         window?.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        // 2. Load the XML Layout
         rootLayout = LayoutInflater.from(this).inflate(R.layout.keyboard_view, null)
         val container = rootLayout?.findViewById<FrameLayout>(R.id.flutter_container)
 
-        // 3. Define Keyboard Height (Prevents 0-pixel/Collapsed view)
+        // OPTIMIZED: Dynamic height based on orientation
         val dm = resources.displayMetrics
-        val keyboardHeight = (dm.heightPixels * 0.40).toInt() // 40% of screen height
+        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        
+        val keyboardHeight = if (isLandscape) {
+            (dm.heightPixels * 0.50).toInt() // 50% in landscape
+        } else {
+            (dm.heightPixels * 0.40).toInt() // 40% in portrait
+        }
 
         container?.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             keyboardHeight
         ).apply { gravity = Gravity.BOTTOM }
 
-        // 4. Attach FlutterView
         flutterView = FlutterView(this)
-        flutterView?.setBackgroundColor(0x00000000) // Transparent Flutter background
+        flutterView?.setBackgroundColor(0x00000000)
         
         flutterEngine?.let {
             flutterView?.attachToFlutterEngine(it)
@@ -118,11 +122,9 @@ class HindiKeyboardService : InputMethodService() {
 
     override fun onFinishInputView(finishingInput: Boolean) {
         super.onFinishInputView(finishingInput)
-        // Put Flutter to sleep to save battery when keyboard is closed
         flutterEngine?.lifecycleChannel?.appIsInactive()
     }
 
-    // --- Prevent Black Fullscreen Issues ---
     override fun onEvaluateFullscreenMode(): Boolean = false
     override fun onEvaluateInputViewShown(): Boolean = true
     override fun onUpdateExtractingViews(ei: EditorInfo?) {
