@@ -13,6 +13,7 @@ import '../services/hive_service.dart';
 import '../services/transliterator_factory.dart';
 import '../providers/settings_provider.dart';
 import 'keyboard_layouts.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 
 class KeyboardWidget extends ConsumerStatefulWidget {
   const KeyboardWidget({super.key});
@@ -26,6 +27,8 @@ class _KeyboardWidgetState extends ConsumerState<KeyboardWidget> {
   bool _isShift = false;
   bool _isCaps = false;
   bool _showSymbols = false;
+  bool _showThemePicker = false;
+  bool _showEmoji = false;
 
   String _inputBuffer = '';
   List<CustomWord> _customSuggestions = [];
@@ -305,6 +308,9 @@ class _KeyboardWidgetState extends ConsumerState<KeyboardWidget> {
           (_currentLanguage.index + 1) % KeyboardLanguage.values.length;
       _currentLanguage = KeyboardLanguage.values[nextIndex];
       _showSymbols = false;
+
+      // Persist the selection
+      ref.read(settingsProvider.notifier).setDefaultLanguage(nextIndex);
     });
   }
 
@@ -372,39 +378,43 @@ class _KeyboardWidgetState extends ConsumerState<KeyboardWidget> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (hasPreview) _buildPreviewBar(theme, fontFamily),
-              if (hasSuggestions)
-                _buildSuggestionBar(settings, theme, fontFamily),
-              Flexible(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(height: 2),
-                    if (hasNumberRow)
-                      _buildNumberRow(
+              _buildToolbarRow(settings, theme),
+              if (_showThemePicker) _buildThemePicker(settings, theme),
+              if (_showEmoji) _buildEmojiGrid(settings, theme),
+              // Only show keyboard when no picker is active
+              if (!_showThemePicker && !_showEmoji) ...[
+                if (hasPreview) _buildPreviewBar(theme, fontFamily),
+                Flexible(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 2),
+                      if (hasNumberRow)
+                        _buildNumberRow(
+                          settings,
+                          theme,
+                          keyWidth,
+                          adjustedKeyHeight,
+                        ),
+                      ..._buildKeyRows(
                         settings,
                         theme,
                         keyWidth,
                         adjustedKeyHeight,
+                        fontFamily,
                       ),
-                    ..._buildKeyRows(
-                      settings,
-                      theme,
-                      keyWidth,
-                      adjustedKeyHeight,
-                      fontFamily,
-                    ),
-                    _buildBottomRow(
-                      settings,
-                      theme,
-                      keyWidth,
-                      adjustedKeyHeight,
-                      fontFamily,
-                    ),
-                    const SizedBox(height: 4),
-                  ],
+                      _buildBottomRow(
+                        settings,
+                        theme,
+                        keyWidth,
+                        adjustedKeyHeight,
+                        fontFamily,
+                      ),
+                      const SizedBox(height: 4),
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         );
@@ -663,5 +673,221 @@ class _KeyboardWidgetState extends ConsumerState<KeyboardWidget> {
         children: _withGap(children, gap),
       ),
     );
+  }
+
+  // ================== TOOLBAR ==================
+
+  Widget _buildToolbarRow(KeyboardSettings settings, KeyboardTheme theme) {
+    final fontFamily = _currentLanguage.fontFamily;
+    final hasSuggestions =
+        settings.showSuggestions &&
+        (_customSuggestions.isNotEmpty ||
+            _transliteratedSuggestions.isNotEmpty);
+
+    return Container(
+      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      color: theme.backgroundColor,
+      child: Row(
+        children: [
+          // Settings/Theme button
+          _toolbarIcon(
+            icon: Icons.palette_outlined,
+            isActive: _showThemePicker,
+            theme: theme,
+            onTap: () {
+              if (settings.hapticFeedback) KeyboardController.vibrate();
+              setState(() {
+                _showThemePicker = !_showThemePicker;
+                _showEmoji = false;
+              });
+            },
+          ),
+          const SizedBox(width: 4),
+          // Emoji button
+          _toolbarIcon(
+            icon: Icons.emoji_emotions_outlined,
+            isActive: _showEmoji,
+            theme: theme,
+            onTap: () {
+              if (settings.hapticFeedback) KeyboardController.vibrate();
+              setState(() {
+                _showEmoji = !_showEmoji;
+                _showThemePicker = false;
+              });
+            },
+          ),
+          const SizedBox(width: 8),
+          // Inline suggestions (scrollable)
+          Expanded(
+            child: hasSuggestions
+                ? SizedBox(
+                    height: 32,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount:
+                          _customSuggestions.length +
+                          _transliteratedSuggestions.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 6),
+                      itemBuilder: (context, index) {
+                        String suggestion;
+                        bool isCustom = index < _customSuggestions.length;
+                        if (isCustom) {
+                          suggestion = _customSuggestions[index].englishWord;
+                        } else {
+                          suggestion =
+                              _transliteratedSuggestions[index -
+                                  _customSuggestions.length];
+                        }
+                        return GestureDetector(
+                          onTap: () => _onSuggestionTap(suggestion, settings),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: theme.keyColor,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Center(
+                              child: Text(
+                                suggestion,
+                                style: TextStyle(
+                                  color: theme.textColor,
+                                  fontSize: 13,
+                                  fontFamily: fontFamily,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+          const SizedBox(width: 8),
+          // Voice button
+          _toolbarIcon(
+            icon: Icons.mic_none,
+            isActive: false,
+            theme: theme,
+            onTap: () {
+              if (settings.hapticFeedback) KeyboardController.vibrate();
+              _onVoiceTap();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _toolbarIcon({
+    required IconData icon,
+    required bool isActive,
+    required KeyboardTheme theme,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 36,
+        height: 32,
+        decoration: BoxDecoration(
+          color: isActive
+              ? theme.accentColor.withOpacity(0.2)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          size: 22,
+          color: isActive
+              ? theme.accentColor
+              : theme.textColor.withOpacity(0.7),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemePicker(
+    KeyboardSettings settings,
+    KeyboardTheme currentTheme,
+  ) {
+    return Container(
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      color: currentTheme.backgroundColor,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: KeyboardTheme.allThemes.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final theme = KeyboardTheme.allThemes[index];
+          final isSelected = theme.name == settings.themeName;
+          return GestureDetector(
+            onTap: () {
+              if (settings.hapticFeedback) KeyboardController.vibrate();
+              ref.read(settingsProvider.notifier).setThemeName(theme.name);
+            },
+            child: Container(
+              width: 48,
+              decoration: BoxDecoration(
+                color: theme.keyColor,
+                borderRadius: BorderRadius.circular(8),
+                border: isSelected
+                    ? Border.all(color: currentTheme.accentColor, width: 2)
+                    : null,
+              ),
+              child: Center(
+                child: Text(
+                  theme.name.substring(0, 1),
+                  style: TextStyle(
+                    color: theme.textColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildEmojiGrid(KeyboardSettings settings, KeyboardTheme theme) {
+    return SizedBox(
+      height: 250,
+      child: EmojiPicker(
+        onEmojiSelected: (category, emoji) {
+          if (settings.hapticFeedback) KeyboardController.vibrate();
+          KeyboardController.inputText(emoji.emoji);
+        },
+        config: Config(
+          height: 250,
+          emojiViewConfig: EmojiViewConfig(
+            columns: 8,
+            emojiSizeMax: 28,
+            backgroundColor: theme.backgroundColor,
+          ),
+          categoryViewConfig: CategoryViewConfig(
+            backgroundColor: theme.backgroundColor,
+            indicatorColor: theme.accentColor,
+            iconColorSelected: theme.accentColor,
+            iconColor: theme.textColor.withOpacity(0.5),
+          ),
+          bottomActionBarConfig: const BottomActionBarConfig(enabled: false),
+          searchViewConfig: SearchViewConfig(
+            backgroundColor: theme.backgroundColor,
+            buttonIconColor: theme.textColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _onVoiceTap() {
+    KeyboardController.startVoiceInput();
   }
 }

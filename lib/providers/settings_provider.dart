@@ -45,96 +45,112 @@ class SettingsNotifier extends StateNotifier<KeyboardSettings> {
   }
 
   Future<void> setHapticFeedback(bool value) async {
+    if (!_alive) return;
     final s = state.copyWith(hapticFeedback: value);
     state = s;
     await HiveService.saveSettings(s);
   }
 
   Future<void> setSoundOnKeyPress(bool value) async {
+    if (!_alive) return;
     final s = state.copyWith(soundOnKeyPress: value);
     state = s;
     await HiveService.saveSettings(s);
   }
 
   Future<void> setShowSuggestions(bool value) async {
+    if (!_alive) return;
     final s = state.copyWith(showSuggestions: value);
     state = s;
     await HiveService.saveSettings(s);
   }
 
   Future<void> setAutoCapitalize(bool value) async {
+    if (!_alive) return;
     final s = state.copyWith(autoCapitalize: value);
     state = s;
     await HiveService.saveSettings(s);
   }
 
   Future<void> setShowNumberRow(bool value) async {
+    if (!_alive) return;
     final s = state.copyWith(showNumberRow: value);
     state = s;
     await HiveService.saveSettings(s);
   }
 
   Future<void> setKeyHeight(double value) async {
+    if (!_alive) return;
     final s = state.copyWith(keyHeight: value);
     state = s;
     await HiveService.saveSettings(s);
   }
 
   Future<void> setFontSize(double value) async {
+    if (!_alive) return;
     final s = state.copyWith(fontSize: value);
     state = s;
     await HiveService.saveSettings(s);
   }
 
   Future<void> setThemeName(String value) async {
+    if (!_alive) return;
     final s = state.copyWith(themeName: value);
     state = s;
     await HiveService.saveSettings(s);
   }
 
   Future<void> setDefaultLanguage(int value) async {
+    if (!_alive) return;
     final s = state.copyWith(defaultLanguageIndex: value);
     state = s;
     await HiveService.saveSettings(s);
   }
 
   Future<void> setSwipeToDelete(bool value) async {
+    if (!_alive) return;
     final s = state.copyWith(swipeToDelete: value);
     state = s;
     await HiveService.saveSettings(s);
   }
 
   Future<void> setLongPressForSymbols(bool value) async {
+    if (!_alive) return;
     final s = state.copyWith(longPressForSymbols: value);
     state = s;
     await HiveService.saveSettings(s);
   }
 
   Future<void> setSuggestionCount(int value) async {
+    if (!_alive) return;
     final s = state.copyWith(suggestionCount: value);
     state = s;
     await HiveService.saveSettings(s);
   }
 
   Future<void> setShowPreview(bool value) async {
+    if (!_alive) return;
     final s = state.copyWith(showPreview: value);
     state = s;
     await HiveService.saveSettings(s);
   }
 
   Future<void> setKeySpacing(double value) async {
+    if (!_alive) return;
     final s = state.copyWith(keySpacing: value);
     state = s;
     await HiveService.saveSettings(s);
   }
 
   Future<void> setEnableGlideTyping(bool value) async {
+    if (!_alive) return;
     final s = state.copyWith(enableGlideTyping: value);
     state = s;
     await HiveService.saveSettings(s);
   }
 
   Future<void> resetSettings() async {
+    if (!_alive) return;
     final s = KeyboardSettings();
     state = s;
     await HiveService.saveSettings(s);

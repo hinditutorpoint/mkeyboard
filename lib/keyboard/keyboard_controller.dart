@@ -158,4 +158,12 @@ class KeyboardController {
       return false;
     }
   }
+
+  static Future<void> startVoiceInput() async {
+    try {
+      await _channel.invokeMethod('startVoiceInput');
+    } catch (e) {
+      debugPrint('Error starting voice input: $e');
+    }
+  }
 }

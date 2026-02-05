@@ -1,190 +1,279 @@
 package com.bhs.mkeyboard
 
 import android.content.Context
-import android.content.res.Configuration
+import android.util.Log
+import android.view.KeyEvent
+import android.view.View
+import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputConnection
 import android.inputmethodservice.InputMethodService
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
-import android.util.Log
-import android.view.Gravity
-import android.view.KeyEvent
-import android.view.LayoutInflater
-import android.view.View
-import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
-import android.widget.FrameLayout
-import android.widget.LinearLayout
-import io.flutter.FlutterInjector
-import io.flutter.embedding.android.FlutterView
-import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.embedding.engine.FlutterEngineCache
-import io.flutter.embedding.engine.dart.DartExecutor
-import io.flutter.plugin.common.MethodChannel
+import androidx.compose.runtime.Recomposer
+import androidx.compose.ui.platform.AndroidUiDispatcher
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.compositionContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeViewModelStoreOwner
+import androidx.savedstate.SavedStateRegistry
+import androidx.savedstate.SavedStateRegistryController
+import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.findViewTreeViewModelStoreOwner
+import androidx.savedstate.findViewTreeSavedStateRegistryOwner
+import com.bhs.mkeyboard.keyboard.KeyboardView
+import com.bhs.mkeyboard.keyboard.KeyboardLanguage
+import com.bhs.mkeyboard.transliteration.Transliterator
+import com.bhs.mkeyboard.transliteration.HindiTransliterator
+import com.bhs.mkeyboard.transliteration.GondiTransliterator
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
-class HindiKeyboardService : InputMethodService() {
-
-    private var flutterEngine: FlutterEngine? = null
-    private var flutterView: FlutterView? = null
-    private var methodChannel: MethodChannel? = null
-    private var rootLayout: View? = null
+class HindiKeyboardService : InputMethodService(), LifecycleOwner, ViewModelStoreOwner, SavedStateRegistryOwner {
 
     companion object {
-        const val IME_ENGINE_ID = "ime_engine"
-        const val CHANNEL_NAME = "com.bhs.mkeyboard/keyboard"
         const val TAG = "HindiKeyboardService"
     }
 
+    private val lifecycleRegistry = LifecycleRegistry(this)
+    private val savedStateRegistryController = SavedStateRegistryController.create(this)
+    private val store = ViewModelStore()
+    
+    // Coroutine scope for Recomposer
+    private var coroutineScope: CoroutineScope? = null
+    private var recomposer: Recomposer? = null
+    
+    // Transliteration state
+    private val hindiTransliterator = HindiTransliterator()
+    private val gondiTransliterator = GondiTransliterator()
+    private var currentTransliterator: Transliterator? = null
+    
+    // Composing text for transliteration
+    private var composingText = StringBuilder()
+    
+    override val lifecycle: Lifecycle
+        get() = lifecycleRegistry
+
+    override val viewModelStore: ViewModelStore
+        get() = store
+    
+    override val savedStateRegistry: SavedStateRegistry
+        get() = savedStateRegistryController.savedStateRegistry
+
     override fun onCreate() {
         super.onCreate()
-        initFlutterEngine()
-    }
-
-    private fun initFlutterEngine() {
-        try {
-            val cache = FlutterEngineCache.getInstance()
-            var engine = cache.get(IME_ENGINE_ID)
-
-            if (engine == null) {
-                engine = FlutterEngine(this)
-                val loader = FlutterInjector.instance().flutterLoader()
-                if (!loader.initialized()) loader.startInitialization(this)
-                loader.ensureInitializationComplete(this, null)
-
-                engine.dartExecutor.executeDartEntrypoint(
-                    DartExecutor.DartEntrypoint(loader.findAppBundlePath(), "imeMain")
-                )
-                cache.put(IME_ENGINE_ID, engine)
-            }
-
-            flutterEngine = engine
-            methodChannel = MethodChannel(engine.dartExecutor.binaryMessenger, CHANNEL_NAME)
-            setupMethodChannel()
-
-        } catch (e: Exception) {
-            Log.e(TAG, "Engine init failed: ${e.message}")
+        savedStateRegistryController.performRestore(null)
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+        
+        // Create Recomposer with AndroidUiDispatcher
+        coroutineScope = CoroutineScope(SupervisorJob() + AndroidUiDispatcher.Main)
+        recomposer = Recomposer(AndroidUiDispatcher.Main)
+        
+        // Launch the recomposer runRecomposeAndApplyChanges loop
+        coroutineScope?.launch {
+            recomposer?.runRecomposeAndApplyChanges()
         }
     }
 
     override fun onCreateInputView(): View {
-        window?.window?.setBackgroundDrawableResource(android.R.color.transparent)
-
-        rootLayout = LayoutInflater.from(this).inflate(R.layout.keyboard_view, null)
-        val container = rootLayout?.findViewById<FrameLayout>(R.id.flutter_container)
-
-        // OPTIMIZED: Dynamic height based on orientation
-        val dm = resources.displayMetrics
-        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        Log.d(TAG, "onCreateInputView: Creating ComposeView")
         
-        val keyboardHeight = if (isLandscape) {
-            (dm.heightPixels * 0.50).toInt() // 50% in landscape
+        // Ensure lifecycle is at RESUMED state
+        if (!lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            if (!lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+            }
+            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        }
+        
+        val composeView = ComposeView(this).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            
+            // Set lifecycle owners directly on ComposeView
+            setViewTreeLifecycleOwner(this@HindiKeyboardService)
+            setViewTreeViewModelStoreOwner(this@HindiKeyboardService)
+            setViewTreeSavedStateRegistryOwner(this@HindiKeyboardService)
+        }
+        
+        // Set our custom recomposer as the compositionContext
+        // This bypasses the WindowRecomposer lookup that walks up the view tree
+        recomposer?.let { composeView.compositionContext = it }
+        
+        composeView.setContent {
+            Log.d(TAG, "setContent: Composing KeyboardView")
+            KeyboardView(
+                onInput = { text, isRaw -> handleInput(text, isRaw) },
+                onBackspace = { handleBackspace() },
+                onEnter = { handleEnter() },
+                onSpace = { handleSpace() },
+                onSettingsClick = { openApp() },
+                onLanguageChanged = { lang -> updateTransliterator(lang) }
+            )
+        }
+        
+        Log.d(TAG, "Returning ComposeView")
+        return composeView
+    }
+    
+    private fun updateTransliterator(lang: KeyboardLanguage) {
+        currentTransliterator = when (lang) {
+            KeyboardLanguage.HINDI -> hindiTransliterator
+            KeyboardLanguage.GONDI -> gondiTransliterator
+            KeyboardLanguage.ENGLISH -> null
+        }
+        resetComposing()
+    }
+
+    private fun handleInput(text: String, isRaw: Boolean = false) {
+        // If raw input (e.g. symbols, numbers in symbol layout), commit directly
+        if (isRaw) {
+            if (composingText.isNotEmpty()) {
+                val transliterator = currentTransliterator
+                if (transliterator != null) {
+                    commitText(transliterator.transliterate(composingText.toString()))
+                } else {
+                    commitText(composingText.toString())
+                }
+                resetComposing()
+            }
+            commitText(text)
+            return
+        }
+
+        val transliterator = currentTransliterator
+        
+        if (transliterator != null) {
+            composingText.append(text)
+            val transliterated = transliterator.transliterate(composingText.toString())
+            setComposingText(transliterated)
         } else {
-            (dm.heightPixels * 0.40).toInt() // 40% in portrait
+            // English - direct commit
+            commitText(text)
         }
-
-        container?.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            keyboardHeight
-        ).apply { gravity = Gravity.BOTTOM }
-
-        flutterView = FlutterView(this)
-        flutterView?.setBackgroundColor(0x00000000)
-        
-        flutterEngine?.let {
-            flutterView?.attachToFlutterEngine(it)
+    }
+    
+    private fun handleBackspace() {
+        if (composingText.isNotEmpty()) {
+            composingText.deleteCharAt(composingText.length - 1)
+            if (composingText.isEmpty()) {
+                currentInputConnection?.commitText("", 1) // Clear composing span
+            } else {
+                val transliterator = currentTransliterator
+                if (transliterator != null) {
+                     val transliterated = transliterator.transliterate(composingText.toString())
+                     setComposingText(transliterated)
+                }
+            }
+        } else {
+            deleteBackward()
         }
-
-        container?.removeAllViews()
-        container?.addView(flutterView)
-
-        return rootLayout!!
+    }
+    
+    private fun handleSpace() {
+        if (composingText.isNotEmpty()) {
+             // Commit the transliterated word, then the space
+             val transliterator = currentTransliterator
+             if (transliterator != null) {
+                 val finalWord = transliterator.transliterate(composingText.toString())
+                 commitText(finalWord) // Commit finishes composing
+             }
+             resetComposing()
+        }
+        commitText(" ")
+    }
+    
+    private fun handleEnter() {
+        if (composingText.isNotEmpty()) {
+             val transliterator = currentTransliterator
+             if (transliterator != null) {
+                 val finalWord = transliterator.transliterate(composingText.toString())
+                 commitText(finalWord)
+             }
+             resetComposing()
+        }
+        sendEnterKey()
+    }
+    
+    private fun resetComposing() {
+        composingText.setLength(0)
+    }
+    
+    private fun setComposingText(text: String) {
+        currentInputConnection?.setComposingText(text, 1)
     }
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
-        
-        flutterEngine?.lifecycleChannel?.appIsResumed()
-        
-        flutterView?.post {
-            flutterView?.invalidate()
-        }
-        
-        updateFullscreenMode()
-
-        info?.let {
-            methodChannel?.invokeMethod("onStartInput", mapOf(
-                "inputType" to it.inputType,
-                "imeOptions" to it.imeOptions,
-                "packageName" to it.packageName
-            ))
-        }
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+        resetComposing()
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
+        // Commit any pending composing text
+        if (composingText.isNotEmpty() && currentTransliterator != null) {
+            commitText(currentTransliterator!!.transliterate(composingText.toString()))
+            resetComposing()
+        }
+        
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         super.onFinishInputView(finishingInput)
-        flutterEngine?.lifecycleChannel?.appIsInactive()
+    }
+
+    override fun onDestroy() {
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        
+        // Clean up Recomposer and coroutine scope
+        recomposer?.cancel()
+        coroutineScope?.cancel()
+        recomposer = null
+        coroutineScope = null
+        
+        store.clear()
+        super.onDestroy()
     }
 
     override fun onEvaluateFullscreenMode(): Boolean = false
     override fun onEvaluateInputViewShown(): Boolean = true
-    override fun onUpdateExtractingViews(ei: EditorInfo?) {
-        super.onUpdateExtractingViews(ei)
-        setExtractViewShown(false)
+
+    private fun commitText(text: String) {
+        currentInputConnection?.commitText(text, 1)
     }
 
-    private fun setupMethodChannel() {
-        methodChannel?.setMethodCallHandler { call, result ->
-            when (call.method) {
-                "inputText" -> {
-                    val text = call.argument<String>("text") ?: ""
-                    currentInputConnection?.commitText(text, 1)
-                    result.success(true)
-                }
-                "deleteBackward" -> {
-                    currentInputConnection?.deleteSurroundingText(1, 0)
-                    result.success(true)
-                }
-                "sendKeyEvent" -> {
-                    val keyCode = call.argument<Int>("keyCode") ?: 0
-                    currentInputConnection?.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, keyCode))
-                    currentInputConnection?.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, keyCode))
-                    result.success(true)
-                }
-                "vibrate" -> {
-                    val duration = (call.argument<Any>("duration") as? Number)?.toLong() ?: 50L
-                    vibrate(duration)
-                    result.success(true)
-                }
-                "hideKeyboard" -> {
-                    requestHideSelf(0)
-                    result.success(true)
-                }
-                "switchLanguage" -> {
-                    val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        switchToNextInputMethod(false)
-                    } else {
-                        imm.switchToNextInputMethod(window?.window?.attributes?.token, false)
-                    }
-                    result.success(true)
-                }
-                else -> result.notImplemented()
+    private fun deleteBackward() {
+        currentInputConnection?.deleteSurroundingText(1, 0)
+    }
+
+    private fun openApp() {
+        try {
+            val intent = packageManager.getLaunchIntentForPackage(packageName)
+            if (intent != null) {
+                intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+            } else {
+                Log.e(TAG, "Launch intent not found for package: $packageName")
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error opening app", e)
         }
     }
 
-    private fun vibrate(duration: Long) {
-        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator ?: return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE))
-        } else {
-            vibrator.vibrate(duration)
-        }
-    }
-
-    override fun onDestroy() {
-        flutterView?.detachFromFlutterEngine()
-        flutterView = null
-        super.onDestroy()
+    private fun sendEnterKey() {
+        currentInputConnection?.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
+        currentInputConnection?.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
     }
 }

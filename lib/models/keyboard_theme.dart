@@ -93,6 +93,16 @@ class KeyboardTheme {
     accentColor: Color(0xFF5C6BC0),
   );
 
+  static const KeyboardTheme tribal = KeyboardTheme(
+    name: 'Tribal',
+    backgroundColor: Color(0xFF3E2723), // Dark Brown
+    keyColor: Color(0xFF4E342E), // Brown
+    keyPressedColor: Color(0xFF5D4037),
+    textColor: Color(0xFFFFB74D), // Tribal Gold/Orange
+    specialKeyColor: Color(0xFF6D4C41),
+    accentColor: Color(0xFFFFCC80),
+  );
+
   static const List<KeyboardTheme> allThemes = [
     light,
     dark,
@@ -101,6 +111,7 @@ class KeyboardTheme {
     sunset,
     purple,
     gradient,
+    tribal,
   ];
 
   static KeyboardTheme fromName(String name) {
