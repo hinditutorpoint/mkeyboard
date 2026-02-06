@@ -2,9 +2,6 @@ package com.bhs.mkeyboard.keyboard
 
 import androidx.compose.ui.graphics.Color
 
-/**
- * Keyboard theme data class - mirrors Flutter KeyboardTheme
- */
 data class KeyboardTheme(
     val name: String,
     val backgroundColor: Color,
@@ -79,10 +76,10 @@ data class KeyboardTheme(
 
         val Tribal = KeyboardTheme(
             name = "Tribal",
-            backgroundColor = Color(0xFF3E2723), // Dark Brown
-            keyColor = Color(0xFF4E342E), // Brown
+            backgroundColor = Color(0xFF3E2723),
+            keyColor = Color(0xFF4E342E),
             keyPressedColor = Color(0xFF5D4037),
-            textColor = Color(0xFFFFB74D), // Tribal Gold/Orange
+            textColor = Color(0xFFFFB74D),
             specialKeyColor = Color(0xFF6D4C41),
             accentColor = Color(0xFFFFCC80)
         )

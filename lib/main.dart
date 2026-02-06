@@ -4,7 +4,6 @@ import 'services/hive_service.dart';
 import 'screens/text_editor_screen.dart';
 import 'screens/setup_screen.dart';
 import 'screens/settings_screen.dart';
-import 'keyboard/keyboard_widget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +44,7 @@ class _ImeApp extends StatelessWidget {
       ),
       home: const Scaffold(
         backgroundColor: Colors.transparent,
-        body: Align(alignment: Alignment.bottomCenter, child: KeyboardWidget()),
+        body: SizedBox.shrink(), // No Flutter Keyboard
       ),
     );
   }

@@ -26,10 +26,36 @@ object KeyboardLayouts {
     val numbers = listOf(
         listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
     )
+
+    val gondiNumbers = listOf(
+        listOf("𑵑", "𑵒", "𑵓", "𑵔", "𑵕", "𑵖", "𑵗", "𑵘", "𑵙", "𑵐")
+    )
+
+    // ── NUMBER PAD LAYOUT (for number input fields) ─────────────
+    val numberPad = listOf(
+        listOf("1", "2", "3"),
+        listOf("4", "5", "6"),
+        listOf("7", "8", "9"),
+        listOf("*", "0", "#")
+    )
+
+    // ── PHONE PAD LAYOUT (for phone number fields) ──────────────
+    val phonePad = listOf(
+        listOf("1", "2", "3"),
+        listOf("4", "5", "6"),
+        listOf("7", "8", "9"),
+        listOf("+", "0", ",")
+    )
     
     // Page 1: Numbers + Common Symbols (Gboard Style)
     val symbols1 = listOf(
         listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0"),
+        listOf("@", "#", "₹", "_", "&", "-", "+", "(", ")", "/"),
+        listOf("*", "\"", "'", ":", ";", "!", "?")
+    )
+
+    val gondiSymbols1 = listOf(
+        listOf("𑵑", "𑵒", "𑵓", "𑵔", "𑵕", "𑵖", "𑵗", "𑵘", "𑵙", "𑵐"),
         listOf("@", "#", "₹", "_", "&", "-", "+", "(", ")", "/"),
         listOf("*", "\"", "'", ":", ";", "!", "?")
     )

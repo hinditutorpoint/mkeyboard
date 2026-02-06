@@ -74,6 +74,8 @@ class HiveService {
         if (_customWordsBox.isEmpty) {
           await _addDefaultWords();
         }
+        // Initial sync to SharedPreferences for native keyboard
+        await _syncCustomWordsToSharedPreferences();
       }
     } catch (e) {
       debugPrint('Critical Hive init error: $e');
@@ -299,6 +301,41 @@ class HiveService {
     }
   }
 
+  /// Sync custom words to SharedPreferences as JSON so native Kotlin keyboard can read them.
+  /// Called whenever custom words are added, updated, or deleted.
+  static Future<void> _syncCustomWordsToSharedPreferences() async {
+    try {
+      if (!Hive.isBoxOpen(customWordsBoxName)) return;
+
+      final prefs = await SharedPreferences.getInstance();
+      final words = _customWordsBox.values.toList();
+
+      // Convert to JSON array format
+      final jsonList = words
+          .map(
+            (w) => {
+              'english': w.englishWord,
+              'translated': w.translatedWord,
+              'language': w.languageIndex,
+              'usageCount': w.usageCount,
+              'isPinned': w.isPinned,
+            },
+          )
+          .toList();
+
+      final jsonString = jsonList.isNotEmpty
+          ? '[${jsonList.map((m) => '{"english":"${m['english']}","translated":"${m['translated']}","language":${m['language']},"usageCount":${m['usageCount']},"isPinned":${m['isPinned']}}').join(',')}]'
+          : '[]';
+
+      await prefs.setString('flutter.customWords', jsonString);
+      debugPrint(
+        'Custom words synced to SharedPreferences: ${words.length} words',
+      );
+    } catch (e) {
+      debugPrint('Error syncing custom words to SharedPreferences: $e');
+    }
+  }
+
   static Future<int> addCustomWord(CustomWord word) async {
     try {
       await ensureInitialized();
@@ -320,7 +357,9 @@ class HiveService {
         throw Exception('Word already exists');
       }
 
-      return _customWordsBox.add(word);
+      final result = await _customWordsBox.add(word);
+      await _syncCustomWordsToSharedPreferences();
+      return result;
     } catch (e) {
       debugPrint('Error adding custom word: $e');
       return -1;
@@ -332,6 +371,7 @@ class HiveService {
       await ensureInitialized();
       if (Hive.isBoxOpen(customWordsBoxName)) {
         await _customWordsBox.putAt(index, word);
+        await _syncCustomWordsToSharedPreferences();
       }
     } catch (e) {
       debugPrint('Error updating custom word: $e');
@@ -343,6 +383,7 @@ class HiveService {
       await ensureInitialized();
       if (Hive.isBoxOpen(customWordsBoxName)) {
         await _customWordsBox.deleteAt(index);
+        await _syncCustomWordsToSharedPreferences();
       }
     } catch (e) {
       debugPrint('Error deleting custom word: $e');
@@ -382,6 +423,7 @@ class HiveService {
           index,
           word.copyWith(isPinned: !word.isPinned),
         );
+        await _syncCustomWordsToSharedPreferences();
       }
     } catch (e) {
       debugPrint('Error toggling pinned: $e');
@@ -395,6 +437,7 @@ class HiveService {
 
       await _customWordsBox.clear();
       await _addDefaultWords();
+      await _syncCustomWordsToSharedPreferences();
     } catch (e) {
       debugPrint('Error clearing all custom words: $e');
     }

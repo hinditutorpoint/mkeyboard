@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.0"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -64,6 +65,17 @@ android {
         
         // Emoji Picker
         implementation("androidx.emoji2:emoji2-emojipicker:1.0.0-alpha03")
+        
+        // Coil for async image loading (wallpapers)
+        implementation("io.coil-kt:coil-compose:2.5.0")
+        
+        // Ktor HTTP client for Pixabay API
+        implementation("io.ktor:ktor-client-android:2.3.7")
+        implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
+        implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
+        
+        // Kotlinx Serialization
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
     }
 }
 

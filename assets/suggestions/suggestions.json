@@ -1,0 +1,226 @@
+[
+    {
+        "gondi": "मेहचीकून",
+        "hindi": "चराकर",
+        "gondiword": "𑴤𑴺𑴬𑴑𑴳𑴌𑴵𑴟",
+        "kbd_key": "mehachIkUna",
+        "english": "after grazing",
+        "ipa_pronunciation": "meːhətʃiːkuːn"
+    },
+    {
+        "gondi": "ओहा",
+        "hindi": "फोड़",
+        "gondiword": "𑴉𑴬𑴱",
+        "kbd_key": "Ohaa",
+        "english": "burst",
+        "ipa_pronunciation": "oːhɑː",
+        "alternatives": [
+            "to burst",
+            "to break open"
+        ]
+    },
+    {
+        "gondi": "ओहची",
+        "hindi": "फोड़के",
+        "gondiword": "𑴉𑴬𑴑𑴳",
+        "kbd_key": "OhachI",
+        "english": "having burst",
+        "ipa_pronunciation": "oːhətʃiː"
+    },
+    {
+        "gondi": "ओहचीकून",
+        "hindi": "फोड़कर",
+        "gondiword": "𑴉𑴬𑴑𑴳𑴌𑴵𑴟",
+        "kbd_key": "OhachIkUna",
+        "english": "after bursting",
+        "ipa_pronunciation": "oːhətʃiːkuːn"
+    },
+    {
+        "gondi": "उहा",
+        "hindi": "पिला",
+        "gondiword": "𑴄𑴬𑴱",
+        "kbd_key": "uhaa",
+        "english": "make drink",
+        "ipa_pronunciation": "ʊhɑː"
+    },
+    {
+        "gondi": "उहची",
+        "hindi": "पिलाके",
+        "gondiword": "𑴄𑴬𑴑𑴳",
+        "kbd_key": "uhachI",
+        "english": "having made drink",
+        "ipa_pronunciation": "ʊhətʃiː"
+    },
+    {
+        "gondi": "उहचीकून",
+        "hindi": "पिलाकर",
+        "gondiword": "𑴄𑴬𑴑𑴳𑴌𑴵𑴟",
+        "kbd_key": "uhachIkUna",
+        "english": "after making drink",
+        "ipa_pronunciation": "ʊhətʃiːkuːn"
+    },
+    {
+        "gondi": "पोहा",
+        "hindi": "बहा",
+        "gondiword": "𑴠𑴽𑴬𑴱",
+        "kbd_key": "pohaa",
+        "english": "flow/cause to flow",
+        "ipa_pronunciation": "poːhɑː"
+    },
+    {
+        "gondi": "पोहाना",
+        "hindi": "बहाना",
+        "gondiword": "𑴠𑴽𑴬𑴱𑴟𑴱",
+        "kbd_key": "pohaanaa",
+        "english": "to flow",
+        "ipa_pronunciation": "poːhɑːnɑː",
+        "alternatives": [
+            "to flow",
+            "to pour"
+        ]
+    },
+    {
+        "gondi": "पोहची",
+        "hindi": "बहाके",
+        "gondiword": "𑴠𑴽𑴬𑴑𑴳",
+        "kbd_key": "pohachI",
+        "english": "having flowed",
+        "ipa_pronunciation": "poːhətʃiː",
+        "alternatives": [
+            "having flowed",
+            "having poured"
+        ]
+    },
+    {
+        "gondi": "पोहचीकून",
+        "hindi": "बहाकर",
+        "gondiword": "𑴠𑴽𑴬𑴑𑴳𑴌𑴵𑴟",
+        "kbd_key": "pohachIkUna",
+        "english": "after flowing",
+        "ipa_pronunciation": "poːhətʃiːkuːn",
+        "alternatives": [
+            "after flowing",
+            "after pouring"
+        ]
+    },
+    {
+        "gondi": "एहा",
+        "hindi": "नींद",
+        "gondiword": "𑴆𑴬𑴱",
+        "kbd_key": "ehaa",
+        "english": "sleep",
+        "ipa_pronunciation": "eːhɑː",
+        "alternatives": [
+            "sleep",
+            "nap"
+        ]
+    },
+    {
+        "gondi": "एहाना",
+        "hindi": "नींदना",
+        "gondiword": "𑴆𑴬𑴱𑴟𑴱",
+        "kbd_key": "ehaanaa",
+        "english": "to feel sleepy",
+        "ipa_pronunciation": "eːhɑːnɑː",
+        "alternatives": [
+            "to feel sleepy",
+            "to feel drowsy"
+        ]
+    },
+    {
+        "gondi": "एहची",
+        "hindi": "नींदके",
+        "gondiword": "𑴆𑴬𑴑𑴳",
+        "kbd_key": "ehachI",
+        "english": "having slept",
+        "ipa_pronunciation": "eːhətʃiː",
+        "alternatives": [
+            "having slept",
+            "after sleeping"
+        ]
+    },
+    {
+        "gondi": "एहचीकून",
+        "hindi": "नींदकर",
+        "gondiword": "𑴆𑴬𑴑𑴳𑴌𑴵𑴟",
+        "kbd_key": "ehachIkUna",
+        "english": "after sleeping",
+        "ipa_pronunciation": "eːhətʃiːkuːn",
+        "alternatives": [
+            "after sleeping",
+            "having slept"
+        ]
+    },
+    {
+        "gondi": "गुहा",
+        "hindi": "छीन",
+        "gondiword": "𑴎𑴴𑴬𑴱",
+        "kbd_key": "guhaa",
+        "english": "snatch",
+        "ipa_pronunciation": "gʊhɑː",
+        "alternatives": [
+            "snatch",
+            "grab"
+        ]
+    },
+    {
+        "gondi": "गुहची",
+        "hindi": "छीनके",
+        "gondiword": "𑴎𑴴𑴬𑴑𑴳",
+        "kbd_key": "guhachI",
+        "english": "having snatched",
+        "ipa_pronunciation": "gʊhətʃiː",
+        "alternatives": [
+            "having snatched",
+            "after snatching"
+        ]
+    },
+    {
+        "gondi": "गुहचीकून",
+        "hindi": "छीनकर",
+        "gondiword": "𑴎𑴴𑴬𑴑𑴳𑴌𑴵𑴟",
+        "kbd_key": "guhachIkUna",
+        "english": "after snatching",
+        "ipa_pronunciation": "gʊhətʃiːkuːn",
+        "alternatives": [
+            "after snatching",
+            "having snatched"
+        ]
+    },
+    {
+        "gondi": "मीहा",
+        "hindi": "गीरा",
+        "gondiword": "𑴤𑴳𑴬𑴱",
+        "kbd_key": "mIhaa",
+        "english": "drop",
+        "ipa_pronunciation": "miːhɑː",
+        "alternatives": [
+            "drop",
+            "let fall"
+        ]
+    },
+    {
+        "gondi": "मीहाना",
+        "hindi": "गिराना",
+        "gondiword": "𑴤𑴳𑴬𑴱𑴟𑴱",
+        "kbd_key": "mIhaanaa",
+        "english": "to drop",
+        "ipa_pronunciation": "miːhɑːnɑː",
+        "alternatives": [
+            "to drop",
+            "to let fall"
+        ]
+    },
+    {
+        "gondi": "मीहची",
+        "hindi": "गिराके",
+        "gondiword": "𑴤𑴳𑴬𑴑𑴳",
+        "kbd_key": "mIhachI",
+        "english": "having dropped",
+        "ipa_pronunciation": "miːhətʃiː",
+        "alternatives": [
+            "having dropped",
+            "after dropping"
+        ]
+    }
+]

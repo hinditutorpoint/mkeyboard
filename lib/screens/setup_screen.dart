@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../keyboard/keyboard_controller.dart';
+import '../services/system_service.dart';
 import 'settings_screen.dart';
 
 class SetupScreen extends StatefulWidget {
@@ -23,8 +23,8 @@ class _SetupScreenState extends State<SetupScreen> {
   Future<void> _checkKeyboardStatus() async {
     setState(() => _isLoading = true);
 
-    final enabled = await KeyboardController.isKeyboardEnabled();
-    final selected = await KeyboardController.isKeyboardSelected();
+    final enabled = await SystemService.isKeyboardEnabled();
+    final selected = await SystemService.isKeyboardSelected();
 
     setState(() {
       _isEnabled = enabled;
@@ -159,7 +159,7 @@ class _SetupScreenState extends State<SetupScreen> {
                       isCompleted: _isEnabled,
                       buttonText: 'Open Settings',
                       onTap: () async {
-                        await KeyboardController.openKeyboardSettings();
+                        await SystemService.openKeyboardSettings();
                         Future.delayed(
                           const Duration(seconds: 1),
                           _checkKeyboardStatus,
@@ -179,7 +179,7 @@ class _SetupScreenState extends State<SetupScreen> {
                       isEnabled: _isEnabled,
                       buttonText: 'Select Keyboard',
                       onTap: () async {
-                        await KeyboardController.openInputMethodPicker();
+                        await SystemService.showInputMethodPicker();
                         Future.delayed(
                           const Duration(seconds: 1),
                           _checkKeyboardStatus,

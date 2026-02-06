@@ -4,251 +4,316 @@ class HindiTransliterator : Transliterator {
     override val languageName: String = "Hindi"
 
     companion object {
-        const val VIRAMA = "्"
+        const val HALANTA = "्"
         const val ANUSVARA = "ं"
         const val VISARGA = "ः"
         const val NUKTA = "़"
         const val CHANDRABINDU = "ँ"
+
+        private val independentVowels = mapOf(
+            "RRi" to "ऋ", "R^i" to "ऋ",
+            "aa" to "आ", "ee" to "ई", "oo" to "ऊ",
+            "ai" to "ऐ", "aI" to "ऐ", "ei" to "ऐ",
+            "au" to "औ", "aU" to "औ", "ou" to "औ",
+            "A" to "आ", "I" to "ई", "U" to "ऊ",
+            "E" to "ऐ", "O" to "औ",
+            "Ri" to "ऋ", ".r" to "ऋ",
+            "a" to "अ", "i" to "इ", "u" to "उ",
+            "e" to "ए", "o" to "ओ",
+            "ā" to "आ", "ī" to "ई", "ū" to "ऊ",
+            "ē" to "ए", "ō" to "ओ", "ṛ" to "ऋ"
+        )
+
+        private val vowelSigns = mapOf(
+            "RRi" to "ृ", "R^i" to "ृ",
+            "aa" to "ा", "ee" to "ी", "oo" to "ू",
+            "ai" to "ै", "aI" to "ै", "ei" to "ै",
+            "au" to "ौ", "aU" to "ौ", "ou" to "ौ",
+            "A" to "ा", "I" to "ी", "U" to "ू",
+            "E" to "ै", "O" to "ौ",
+            "Ri" to "ृ", ".r" to "ृ",
+            "i" to "ि", "u" to "ु",
+            "e" to "े", "o" to "ो",
+            "ā" to "ा", "ī" to "ी", "ū" to "ू",
+            "ē" to "े", "ō" to "ो", "ṛ" to "ृ"
+        )
+
+        private val consonants = mapOf(
+            "GY" to "ज्ञ", "dny" to "ज्ञ", "jny" to "ज्ञ",
+            "shh" to "ष", "chh" to "छ",
+            "kh" to "ख", "Kh" to "ख",
+            "gh" to "घ", "Gh" to "घ",
+            "ng" to "ङ", "~N" to "ङ", "N^" to "ङ",
+            "k" to "क", "K" to "क",
+            "g" to "ग", "G" to "ग",
+            "Ch" to "छ",
+            "ch" to "च",
+            "jh" to "झ", "Jh" to "झ",
+            "ny" to "ञ", "JN" to "ञ", "~n" to "ञ",
+            "c" to "च", "C" to "छ",
+            "j" to "ज", "J" to "ज",
+            "Th" to "ठ", "ṭh" to "ठ",
+            "Dh" to "ढ", "ḍh" to "ढ",
+            "T" to "ट", "ṭ" to "ट",
+            "D" to "ड", "ḍ" to "ड",
+            "N" to "ण", "ṇ" to "ण",
+            "th" to "थ", "dh" to "ध",
+            "t" to "त", "d" to "द", "n" to "न",
+            "ph" to "फ", "bh" to "भ", "Bh" to "भ",
+            "p" to "प", "P" to "फ", "f" to "फ",
+            "b" to "ब", "B" to "ब",
+            "m" to "म",
+            "y" to "य", "r" to "र",
+            "l" to "ल", "L" to "ल", "ḷ" to "ल",
+            "v" to "व", "w" to "व", "W" to "व", "V" to "व",
+            "Sh" to "ष", "sh" to "श",
+            "S" to "ष", "ss" to "ष",
+            "s" to "स",
+            "ś" to "श", "ṣ" to "ष",
+            "h" to "ह",
+            "x" to "क्ष", "X" to "क्ष",
+            "Z" to "त्र",
+            "ñ" to "ञ", "ṅ" to "ङ"
+        )
+
+        private val nuktaConsonants = mapOf(
+            ".Dh" to "ढ$NUKTA",
+            ".D" to "ड$NUKTA",
+            ".f" to "फ$NUKTA",
+            "q" to "क$NUKTA", "Q" to "क$NUKTA",
+            "z" to "ज$NUKTA"
+        )
+
+        private val numbers = mapOf(
+            "0" to "०", "1" to "१", "2" to "२", "3" to "३", "4" to "४",
+            "5" to "५", "6" to "६", "7" to "७", "8" to "८", "9" to "९"
+        )
+
+        private val maxConsonantLen = consonants.keys.maxOf { it.length }
+        private val maxNuktaLen = nuktaConsonants.keys.maxOf { it.length }
+        private val maxVowelSignLen = vowelSigns.keys.maxOf { it.length }
+        private val maxIndVowelLen = independentVowels.keys.maxOf { it.length }
     }
 
-    private val vowels = mapOf(
-        "a" to "अ", "aa" to "आ", "A" to "आ",
-        "i" to "इ", "ii" to "ई", "I" to "ई", "ee" to "ई",
-        "u" to "उ", "uu" to "ऊ", "U" to "ऊ", "oo" to "ऊ",
-        "ri" to "ऋ", "R" to "ऋ",
-        "e" to "ए", "ai" to "ऐ", "E" to "ऐ",
-        "o" to "ओ", "au" to "औ", "O" to "औ"
-    )
-
-    private val matras = mapOf(
-        "a" to "", "aa" to "ा", "A" to "ा",
-        "i" to "ि", "ii" to "ी", "I" to "ी", "ee" to "ी",
-        "u" to "ु", "uu" to "ू", "U" to "ू", "oo" to "ू",
-        "ri" to "ृ", "R" to "ृ",
-        "e" to "े", "ai" to "ै", "E" to "ै",
-        "o" to "ो", "au" to "ौ", "O" to "ौ"
-    )
-
-    private val consonants = mapOf(
-        "ka" to "क", "k" to "क", "K" to "क",
-        "kha" to "ख", "kh" to "ख", "Kh" to "ख",
-        "ga" to "ग", "g" to "ग", "G" to "ग",
-        "gha" to "घ", "gh" to "घ", "Gh" to "घ",
-        "nga" to "ङ", "ng" to "ङ",
-        "ca" to "च", "cha" to "च", "ch" to "च", "c" to "च",
-        "chha" to "छ", "chh" to "छ", "Ch" to "छ",
-        "ja" to "ज", "j" to "ज", "J" to "ज",
-        "jha" to "झ", "jh" to "झ", "Jh" to "झ",
-        "nya" to "ञ", "ny" to "ञ",
-        "Ta" to "ट", "T" to "ट",
-        "Tha" to "ठ", "Th" to "ठ",
-        "Da" to "ड", "D" to "ड",
-        "Dha" to "ढ", "Dh" to "ढ",
-        "Na" to "ण", "N" to "ण",
-        "ta" to "त", "t" to "त",
-        "tha" to "थ", "th" to "थ",
-        "da" to "द", "d" to "द",
-        "dha" to "ध", "dh" to "ध",
-        "na" to "न", "n" to "न",
-        "pa" to "प", "p" to "प", "P" to "प",
-        "pha" to "फ", "ph" to "फ", "Ph" to "फ",
-        "ba" to "ब", "b" to "ब", "B" to "ब",
-        "bha" to "भ", "bh" to "भ", "Bh" to "भ",
-        "ma" to "म", "m" to "म", "M" to "म",
-        "ya" to "य", "y" to "य", "Y" to "य",
-        "ra" to "र", "r" to "र",
-        "la" to "ल", "l" to "ल", "L" to "ल",
-        "va" to "व", "v" to "व", "V" to "व", "wa" to "व", "w" to "व",
-        "sha" to "श", "sh" to "श",
-        "ssa" to "ष", "ss" to "ष",
-        "sa" to "स", "s" to "स", "S" to "स",
-        "ha" to "ह", "h" to "ह", "H" to "ह"
-    )
-
-    private val specialConjuncts = mapOf(
-        "ksha" to "क्ष", "ksh" to "क्ष",
-        "tra" to "त्र", "tr" to "त्र",
-        "gya" to "ज्ञ", "gy" to "ज्ञ",
-        "jna" to "ज्ञ", "jn" to "ज्ञ",
-        "shra" to "श्र", "shr" to "श्र"
-    )
-
-    private val nuktaConsonants = mapOf(
-        "qa" to "क$NUKTA", "q" to "क$NUKTA",
-        "khha" to "ख$NUKTA", "x" to "ख$NUKTA",
-        "gha_" to "ग$NUKTA",
-        "za" to "ज$NUKTA", "z" to "ज$NUKTA",
-        "rha" to "ड$NUKTA",
-        "rhha" to "ढ$NUKTA",
-        "fa" to "फ$NUKTA", "f" to "फ$NUKTA"
-    )
-
-    private val numbers = mapOf(
-        "0" to "०", "1" to "१", "2" to "२", "3" to "३", "4" to "४",
-        "5" to "५", "6" to "६", "7" to "७", "8" to "८", "9" to "९"
+    private val cache = java.util.Collections.synchronizedMap(
+        object : LinkedHashMap<String, String>(128, 0.75f, true) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, String>?) =
+                size > 500
+        }
     )
 
     override fun transliterate(input: String): String {
         if (input.isEmpty()) return ""
-        
-        val words = input.split(Regex("\\s+"))
-        return words.joinToString(" ") { transliterateWord(it) }
+        cache[input]?.let { return it }
+
+        val parts = input.split(Regex("(?<=\\s)|(?=\\s)"))
+        val result = StringBuilder(input.length * 2)
+        for (part in parts) {
+            if (part.isBlank()) result.append(part)
+            else result.append(transliterateWord(part))
+        }
+        val output = result.toString()
+        cache[input] = output
+        return output
     }
 
     private fun transliterateWord(word: String): String {
         if (word.isEmpty()) return ""
-
-        val buffer = StringBuilder()
+        val buf = StringBuilder(word.length * 2)
         var i = 0
-        var lastWasConsonant = false
+        var hasConsonant = false
+        var hasVowel = false
 
         while (i < word.length) {
-            val charStr = word[i].toString()
-            
-            // Try numbers
+            val ch = word[i]
+            val charStr = ch.toString()
+
+            // NUMBERS
             if (numbers.containsKey(charStr)) {
-                if (lastWasConsonant) {
-                    buffer.append(VIRAMA)
-                    lastWasConsonant = false
-                }
-                buffer.append(numbers[charStr])
+                if (hasConsonant && !hasVowel) buf.append(HALANTA)
+                buf.append(numbers[charStr])
+                hasConsonant = false
+                hasVowel = false
                 i++
                 continue
             }
 
-            // Try nukta consonants
-            var matched = false
-            for (len in 5 downTo 2) {
-                if (i + len <= word.length) {
-                    val substr = word.substring(i, i + len).lowercase()
-                    if (nuktaConsonants.containsKey(substr)) {
-                        if (lastWasConsonant) buffer.append(VIRAMA)
-                        buffer.append(nuktaConsonants[substr])
-                        i += len
-                        lastWasConsonant = true
-                        matched = true
-                        break
-                    }
-                }
-            }
-            if (matched) continue
-
-            // Try special conjuncts
-            for (len in 4 downTo 2) {
-                if (i + len <= word.length) {
-                    val substr = word.substring(i, i + len).lowercase()
-                    if (specialConjuncts.containsKey(substr)) {
-                        if (lastWasConsonant) buffer.append(VIRAMA)
-                        buffer.append(specialConjuncts[substr])
-                        i += len
-                        lastWasConsonant = true
-                        matched = true
-                        break
-                    }
-                }
-            }
-            if (matched) continue
-
-            // Try consonant + vowel (or just consonant)
-            val consonantMatch = matchConsonant(word, i)
-            if (consonantMatch.first != null) {
-                if (lastWasConsonant) buffer.append(VIRAMA)
-                buffer.append(consonantMatch.first)
-                i += consonantMatch.second
-
-                // Try matra
-                if (i < word.length) {
-                    val matraMatch = matchMatra(word, i)
-                    if (matraMatch.first != null && matraMatch.first!!.isNotEmpty()) {
-                        buffer.append(matraMatch.first)
-                        i += matraMatch.second
-                        lastWasConsonant = false
-                    } else {
-                        lastWasConsonant = true
-                    }
+            // PUNCTUATION
+            if (ch == '.' && !startsSpecialDot(word, i)) {
+                if (hasConsonant && !hasVowel) buf.append(HALANTA)
+                if (i + 1 < word.length && word[i + 1] == '.') {
+                    buf.append("॥")
+                    i += 2
                 } else {
-                    lastWasConsonant = true
+                    buf.append("।")
+                    i++
                 }
+                hasConsonant = false
+                hasVowel = false
                 continue
             }
 
-            // Try standalone vowel
-            val vowelMatch = matchVowel(word, i)
-            if (vowelMatch.first != null) {
-                if (lastWasConsonant) buffer.append(VIRAMA)
-                buffer.append(vowelMatch.first)
-                i += vowelMatch.second
-                lastWasConsonant = false
-                continue
-            }
-
-            // Handle anusvara (m/n before consonant)
-            // Simplified logic: m/n followed by something that looks like it needs nasalization
-            val charLower = charStr.lowercase()
-            if ((charLower == "m" || charLower == "n") && i + 1 < word.length) {
-                // If it's a generic nasal context (simplified from Dart)
-                 buffer.append(ANUSVARA)
-                 i++
-                 lastWasConsonant = false
-                 continue
-            }
-
-            // Handle visarga (h at end)
-            if (charLower == "h" && (i + 1 >= word.length)) {
-                buffer.append(VISARGA)
+            // WHITESPACE
+            if (ch == ' ' || ch == '\n' || ch == '\t') {
+                if (hasConsonant && !hasVowel) buf.append(HALANTA)
+                buf.append(ch)
+                hasConsonant = false
+                hasVowel = false
                 i++
-                lastWasConsonant = false
                 continue
             }
 
-            // Unmatched character
-            if (lastWasConsonant && word[i] != ' ') {
-                buffer.append(VIRAMA)
-                lastWasConsonant = false
+            // CHANDRABINDU (.N or MM)
+            if (matchesAt(word, i, ".N") || matchesAt(word, i, "MM")) {
+                buf.append(CHANDRABINDU)
+                i += 2
+                continue
             }
-            buffer.append(word[i])
+
+            // ANUSVARA (.n .m or M-after-vowel)
+            if (matchesAt(word, i, ".n") || matchesAt(word, i, ".m")) {
+                buf.append(ANUSVARA)
+                i += 2
+                continue
+            }
+            if (ch == 'M' && hasVowel) {
+                buf.append(ANUSVARA)
+                hasConsonant = false
+                hasVowel = false
+                i++
+                continue
+            }
+            if (ch == 'ṃ' || ch == 'ṁ') {
+                buf.append(ANUSVARA)
+                hasConsonant = false
+                hasVowel = false
+                i++
+                continue
+            }
+
+            // VISARGA (.h or H-after-vowel)
+            if (matchesAt(word, i, ".h")) {
+                buf.append(VISARGA)
+                i += 2
+                continue
+            }
+            if (ch == 'H' && hasVowel) {
+                buf.append(VISARGA)
+                hasConsonant = false
+                hasVowel = false
+                i++
+                continue
+            }
+            if (ch == 'ḥ') {
+                buf.append(VISARGA)
+                hasConsonant = false
+                hasVowel = false
+                i++
+                continue
+            }
+
+            // NUKTA CONSONANTS
+            val nuktaMatch = matchMap(word, i, nuktaConsonants, maxNuktaLen)
+            if (nuktaMatch != null) {
+                if (hasConsonant && !hasVowel) buf.append(HALANTA)
+                buf.append(nuktaMatch.first)
+                i += nuktaMatch.second
+                hasConsonant = true
+                hasVowel = false
+                val vi = consumeVowel(word, i, buf)
+                if (vi > i) hasVowel = true
+                i = vi
+                continue
+            }
+
+            // CONSONANTS
+            val consMatch = matchMap(word, i, consonants, maxConsonantLen)
+            if (consMatch != null) {
+                if (hasConsonant && !hasVowel) buf.append(HALANTA)
+                buf.append(consMatch.first)
+                i += consMatch.second
+                hasConsonant = true
+                hasVowel = false
+                val vi = consumeVowel(word, i, buf)
+                if (vi > i) hasVowel = true
+                i = vi
+                continue
+            }
+
+            // INDEPENDENT VOWELS
+            val indMatch = matchMap(word, i, independentVowels, maxIndVowelLen)
+            if (indMatch != null) {
+                if (hasConsonant && !hasVowel) buf.append(HALANTA)
+                buf.append(indMatch.first)
+                i += indMatch.second
+                hasConsonant = false
+                hasVowel = true
+                continue
+            }
+
+            // SKIP MODIFIERS
+            if (ch == '^' || ch == '~') {
+                i++
+                continue
+            }
+
+            // UNMATCHED
+            if (hasConsonant && !hasVowel) buf.append(HALANTA)
+            buf.append(ch)
+            hasConsonant = false
+            hasVowel = false
             i++
         }
-        
-        return buffer.toString()
+
+        if (hasConsonant && !hasVowel) buf.append(HALANTA)
+        return buf.toString()
     }
 
-    private fun matchConsonant(word: String, start: Int): Pair<String?, Int> {
-        for (len in 4 downTo 1) {
-            if (start + len <= word.length) {
-                val substr = word.substring(start, start + len)
-                if (consonants.containsKey(substr)) return Pair(consonants[substr], len)
-                if (consonants.containsKey(substr.lowercase())) return Pair(consonants[substr.lowercase()], len)
+    private fun consumeVowel(word: String, start: Int, buf: StringBuilder): Int {
+        if (start >= word.length) return start
+        if (word[start] == 'a') {
+            val next = start + 1
+            if (next < word.length) {
+                when (word[next]) {
+                    'a', 'A' -> { buf.append("ा"); return next + 1 }
+                    'i', 'I' -> { buf.append("ै"); return next + 1 }
+                    'u', 'U' -> { buf.append("ौ"); return next + 1 }
+                }
             }
+            return start + 1
         }
-        return Pair(null, 0)
+        val vs = matchMap(word, start, vowelSigns, maxVowelSignLen)
+        if (vs != null) {
+            buf.append(vs.first)
+            return start + vs.second
+        }
+        return start
     }
 
-    private fun matchMatra(word: String, start: Int): Pair<String?, Int> {
-        for (len in 3 downTo 1) {
-            if (start + len <= word.length) {
-                val substr = word.substring(start, start + len)
-                if (matras.containsKey(substr)) return Pair(matras[substr], len)
-                if (matras.containsKey(substr.lowercase())) return Pair(matras[substr.lowercase()], len)
-            }
+    private fun matchMap(
+        word: String, start: Int, map: Map<String, String>, maxLen: Int
+    ): Pair<String, Int>? {
+        val limit = minOf(maxLen, word.length - start)
+        for (len in limit downTo 1) {
+            val key = word.substring(start, start + len)
+            map[key]?.let { return it to len }
         }
-        return Pair(null, 0)
+        return null
     }
 
-    private fun matchVowel(word: String, start: Int): Pair<String?, Int> {
-        for (len in 3 downTo 1) {
-            if (start + len <= word.length) {
-                val substr = word.substring(start, start + len)
-                if (vowels.containsKey(substr)) return Pair(vowels[substr], len)
-                if (vowels.containsKey(substr.lowercase())) return Pair(vowels[substr.lowercase()], len)
-            }
+    private fun matchesAt(word: String, index: Int, seq: String): Boolean {
+        if (index + seq.length > word.length) return false
+        for (j in seq.indices) {
+            if (word[index + j] != seq[j]) return false
         }
-        return Pair(null, 0)
+        return true
     }
 
-    override fun getSuggestions(input: String, limit: Int): List<String> {
-        // Native suggestion logic would require a dictionary
-        // For now, return empty or implement basic trie later
-        return emptyList()
-    }
+    private fun startsSpecialDot(word: String, i: Int): Boolean =
+        matchesAt(word, i, ".r") || matchesAt(word, i, ".D") ||
+        matchesAt(word, i, ".n") || matchesAt(word, i, ".m") ||
+        matchesAt(word, i, ".h") || matchesAt(word, i, ".N") ||
+        matchesAt(word, i, ".f")
+
+    override fun getSuggestions(input: String, limit: Int): List<String> = emptyList()
 }
