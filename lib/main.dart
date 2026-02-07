@@ -1,53 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'services/hive_service.dart';
 import 'screens/text_editor_screen.dart';
 import 'screens/setup_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/splash_screen.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize Hive in background
-  try {
-    await HiveService.init();
-    debugPrint('✓ Hive initialized');
-  } catch (e) {
-    debugPrint('✗ Error initializing Hive: $e');
-  }
-
+  // Don't await Hive here, let SplashScreen do it to avoid white screen
   runApp(const ProviderScope(child: MyApp()));
-}
-
-@pragma('vm:entry-point')
-Future<void> imeMain() async {
-  debugPrint('IME: Entry point started');
-
-  WidgetsFlutterBinding.ensureInitialized();
-  await HiveService.ensureInitialized();
-  // Start app after Hive is initialized
-  debugPrint('IME: Starting app...');
-  runApp(const ProviderScope(child: _ImeApp()));
-  debugPrint('IME: ✓ App started');
-}
-
-class _ImeApp extends StatelessWidget {
-  const _ImeApp();
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        canvasColor: Colors.transparent,
-        scaffoldBackgroundColor: Colors.transparent,
-      ),
-      home: const Scaffold(
-        backgroundColor: Colors.transparent,
-        body: SizedBox.shrink(), // No Flutter Keyboard
-      ),
-    );
-  }
 }
 
 class MyApp extends StatelessWidget {
@@ -69,7 +30,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.orange,
         useMaterial3: true,
       ),
-      home: const HomeNavigator(),
+      // Start with Splash to init DB
+      home: const SplashScreen(),
     );
   }
 }

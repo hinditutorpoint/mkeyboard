@@ -74,7 +74,9 @@ object KeyboardLayouts {
 enum class KeyboardLanguage(val displayName: String, val fontFamily: String?) {
     ENGLISH("EN", null),
     HINDI("हिं", null),
-    GONDI("𑴌𑴽", "MasaramGondi");
+    GONDI("𑴌𑴽", "MasaramGondi"), // Gondi (Standard)
+    GUNJALA("గొ", "GunjalaGondi"),           // Gunjala Gondi
+    CHIKI("ᱚᱞ", "OlChiki");           // Ol Chiki (Santali)
     
     fun next(): KeyboardLanguage {
         val values = entries

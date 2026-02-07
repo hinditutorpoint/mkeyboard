@@ -76,6 +76,7 @@ fun RowScope.KeyButton(
     var isPressed by remember { mutableStateOf(false) }
     val currentOnTap = rememberUpdatedState(onTap)
     val currentOnLongPress = rememberUpdatedState(onLongPress)
+    val currentVariants = rememberUpdatedState(variants)
     val interactionSource = remember { MutableInteractionSource() }
     val scope = rememberCoroutineScope()
 
@@ -108,7 +109,7 @@ fun RowScope.KeyButton(
             .onGloballyPositioned { coordinates ->
                 keyBoundsInRoot = coordinates.boundsInRoot()
             }
-            .pointerInput(isRepeatable, variants.size) {
+            .pointerInput(isRepeatable, variants, variants.size) {
                 awaitPointerEventScope {
                     while (true) {
                         val down = awaitFirstDown(requireUnconsumed = false)
@@ -144,9 +145,9 @@ fun RowScope.KeyButton(
                             handledByLongPress = true
 
                             when {
-                                variants.isNotEmpty() && popupState != null -> {
+                                currentVariants.value.isNotEmpty() && popupState != null -> {
                                     // Expand preview into variant strip
-                                    popupState.expandToVariants(variants) { variant ->
+                                    popupState.expandToVariants(currentVariants.value) { variant ->
                                         onVariantSelected?.invoke(variant)
                                     }
                                     if (hapticEnabled) vibrate(context)

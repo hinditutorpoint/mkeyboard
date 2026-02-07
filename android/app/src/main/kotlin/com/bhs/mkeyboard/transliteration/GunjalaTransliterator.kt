@@ -1,96 +1,99 @@
 package com.bhs.mkeyboard.transliteration
 
-class GondiTransliterator : Transliterator {
-    override val languageName: String = "Gondi"
+class GunjalaTransliterator : Transliterator {
+    override val languageName: String = "Gunjala Gondi"
 
     companion object {
-        const val HALANTA = "𑵄" // U+11D44 - Final consonant marker
-        const val VIRAMA = "𑵅" // U+11D45 - Conjunct marker
-        const val ANUSVARA = "𑵀" // U+11D40 - Nasalization (M)
-        const val VISARGA = "𑵁" // U+11D41 - Aspiration (H)
-        const val SUKUN = "𑵂" // U+11D42 - Nukta variant
-        const val CHANDRABINDU = "𑵃" // U+11D43 - Chandrabindu (MM)
-        const val REPHA = "𑵆" // U+11D46 - R before consonant
-        const val RAKAR = "𑵇" // U+11D47 - R after consonant
+        // Gunjala Gondi combining marks
+        const val VIRAMA = "\uD806\uDE3A"     // U+1193A - Virama (conjunct)
+        const val HALANTA = "\uD806\uDE3B"     // U+1193B - Final consonant marker
+        const val ANUSVARA = "\uD806\uDE38"    // U+11938 - Nasalization
+        const val VISARGA = "\uD806\uDE39"     // U+11939 - Aspiration
+        const val NUKTA = "\uD806\uDE3C"       // U+1193C - Nukta
+        const val REPHA = "\uD806\uDE3D"       // U+1193D - Repha
+        const val OM = "\uD806\uDE3E"          // U+1193E - Om sign
 
+        // Independent Vowels: U+11900–U+1190F
         private val independentVowels = mapOf(
-            "RRi" to "𑴇", "R^i" to "𑴇", "RRI" to "𑴇", "R^I" to "𑴇",
-            "aa" to "𑴁", "ee" to "𑴃", "oo" to "𑴅",
-            "ai" to "𑴈", "aI" to "𑴈", "ei" to "𑴈",
-            "au" to "𑴋", "aU" to "𑴋", "ou" to "𑴋",
-            "A" to "𑴁", "I" to "𑴃", "U" to "𑴅",
-            "E" to "𑴈", "O" to "𑴉",
-            "Ri" to "𑴇", ".r" to "𑴇",
-            "a" to "𑴀", "i" to "𑴂", "u" to "𑴄",
-            "e" to "𑴆", "o" to "𑴉",
-            "ā" to "𑴁", "ī" to "𑴃", "ū" to "𑴅",
-            "ē" to "𑴆", "ō" to "𑴉", "ṛ" to "𑴇",
-            "R" to "𑴶"
+            "RRi" to "\uD806\uDE07", "R^i" to "\uD806\uDE07",
+            "RRI" to "\uD806\uDE07", "R^I" to "\uD806\uDE07",
+            "aa" to "\uD806\uDE01", "ee" to "\uD806\uDE03", "oo" to "\uD806\uDE05",
+            "ai" to "\uD806\uDE08", "aI" to "\uD806\uDE08", "ei" to "\uD806\uDE08",
+            "au" to "\uD806\uDE0B", "aU" to "\uD806\uDE0B", "ou" to "\uD806\uDE0B",
+            "A" to "\uD806\uDE01", "I" to "\uD806\uDE03", "U" to "\uD806\uDE05",
+            "E" to "\uD806\uDE08", "O" to "\uD806\uDE09",
+            "Ri" to "\uD806\uDE07", ".r" to "\uD806\uDE07",
+            "a" to "\uD806\uDE00", "i" to "\uD806\uDE02", "u" to "\uD806\uDE04",
+            "e" to "\uD806\uDE06", "o" to "\uD806\uDE09",
+            "ā" to "\uD806\uDE01", "ī" to "\uD806\uDE03", "ū" to "\uD806\uDE05",
+            "ē" to "\uD806\uDE06", "ō" to "\uD806\uDE09", "ṛ" to "\uD806\uDE07"
         )
 
+        // Vowel Signs (Matras): U+11930–U+11937
         private val vowelSigns = mapOf(
-            "RRi" to "𑴶", "R^i" to "𑴶", "RRI" to "𑴶", "R^I" to "𑴶",
-            "aa" to "𑴱", "ee" to "𑴳", "oo" to "𑴵",
-            "ai" to "𑴼", "aI" to "𑴼", "ei" to "𑴼",
-            "au" to "𑴿", "aU" to "𑴿", "ou" to "𑴿",
-            "A" to "𑴱", "I" to "𑴳", "U" to "𑴵",
-            "E" to "𑴼", "O" to "𑴽",
-            "Ri" to "𑴶", ".r" to "𑴶",
-            "i" to "𑴲", "u" to "𑴴",
-            "e" to "𑴺", "o" to "𑴽",
-            "ā" to "𑴱", "ī" to "𑴳", "ū" to "𑴵",
-            "ē" to "𑴺", "ō" to "𑴽", "ṛ" to "𑴶",
-            "R" to "𑴶"
+            "RRi" to "\uD806\uDE37", "R^i" to "\uD806\uDE37",
+            "RRI" to "\uD806\uDE37", "R^I" to "\uD806\uDE37",
+            "aa" to "\uD806\uDE30", "ee" to "\uD806\uDE32", "oo" to "\uD806\uDE34",
+            "ai" to "\uD806\uDE35", "aI" to "\uD806\uDE35", "ei" to "\uD806\uDE35",
+            "au" to "\uD806\uDE36", "aU" to "\uD806\uDE36", "ou" to "\uD806\uDE36",
+            "A" to "\uD806\uDE30", "I" to "\uD806\uDE32", "U" to "\uD806\uDE34",
+            "E" to "\uD806\uDE35", "O" to "\uD806\uDE33",
+            "Ri" to "\uD806\uDE37", ".r" to "\uD806\uDE37",
+            "i" to "\uD806\uDE31", "u" to "\uD806\uDE33",
+            "e" to "\uD806\uDE35", "o" to "\uD806\uDE33",
+            "ā" to "\uD806\uDE30", "ī" to "\uD806\uDE32", "ū" to "\uD806\uDE34",
+            "ē" to "\uD806\uDE35", "ō" to "\uD806\uDE33", "ṛ" to "\uD806\uDE37"
         )
 
+        // Consonants: U+11910–U+1192F
         private val consonants = mapOf(
-            "GY" to "𑴯", "dny" to "𑴯", "jny" to "𑴯",
-            "shh" to "𑴪", "chh" to "𑴒",
-            "kh" to "𑴍", "gh" to "𑴏",
-            "ng" to "𑴐", "~N" to "𑴐", "N^" to "𑴐",
-            "k" to "𑴌", "K" to "𑴍",
-            "g" to "𑴎", "G" to "𑴏",
-            "F" to "𑴐",
-            "Ch" to "𑴒",
-            "ch" to "𑴑",
-            "jh" to "𑴔",
-            "ny" to "𑴕", "JN" to "𑴕", "~n" to "𑴕",
-            "c" to "𑴑", "C" to "𑴒",
-            "j" to "𑴓", "J" to "𑴔",
-            "Y" to "𑴕",
-            "Th" to "𑴗", "ṭh" to "𑴗",
-            "Dh" to "𑴙", "ḍh" to "𑴙",
-            "T" to "𑴖", "ṭ" to "𑴖",
-            "D" to "𑴘", "ḍ" to "𑴘",
-            "N" to "𑴚", "ṇ" to "𑴚",
-            "th" to "𑴜", "dh" to "𑴞",
-            "t" to "𑴛", "d" to "𑴝", "n" to "𑴟",
-            "ph" to "𑴡", "bh" to "𑴣",
-            "p" to "𑴠", "P" to "𑴡", "f" to "𑴡", "F" to "𑴐",
-            "b" to "𑴢", "B" to "𑴣",
-            "m" to "𑴤",
-            "y" to "𑴥", "Y" to "𑴕", "r" to "𑴦",
-            "l" to "𑴧", "L" to "𑴭", "ḷ" to "𑴭",
-            "v" to "𑴨", "w" to "𑴨", "W" to "𑴨", "V" to "𑴨",
-            "Sh" to "𑴪", "sh" to "𑴩",
-            "S" to "𑴪", "ss" to "𑴪",
-            "s" to "𑴫",
-            "ś" to "𑴩", "ṣ" to "𑴪",
-            "h" to "𑴬", "H" to "𑴬",
-            "x" to "𑴮", "X" to "𑴯", "Z" to "𑴰",
-            "ñ" to "𑴕", "ṅ" to "𑴐"
+            "GY" to "\uD806\uDE2F", "dny" to "\uD806\uDE2F", "jny" to "\uD806\uDE2F",
+            "shh" to "\uD806\uDE2A", "chh" to "\uD806\uDE12",
+            "kh" to "\uD806\uDE11", "gh" to "\uD806\uDE13",
+            "ng" to "\uD806\uDE14", "~N" to "\uD806\uDE14", "N^" to "\uD806\uDE14",
+            "k" to "\uD806\uDE10", "K" to "\uD806\uDE11",
+            "g" to "\uD806\uDE12", "G" to "\uD806\uDE13",
+            "Ch" to "\uD806\uDE16",
+            "ch" to "\uD806\uDE15",
+            "jh" to "\uD806\uDE18",
+            "ny" to "\uD806\uDE19", "JN" to "\uD806\uDE19", "~n" to "\uD806\uDE19",
+            "c" to "\uD806\uDE15", "C" to "\uD806\uDE16",
+            "j" to "\uD806\uDE17", "J" to "\uD806\uDE18",
+            "Th" to "\uD806\uDE1B", "ṭh" to "\uD806\uDE1B",
+            "Dh" to "\uD806\uDE1D", "ḍh" to "\uD806\uDE1D",
+            "T" to "\uD806\uDE1A", "ṭ" to "\uD806\uDE1A",
+            "D" to "\uD806\uDE1C", "ḍ" to "\uD806\uDE1C",
+            "N" to "\uD806\uDE1E", "ṇ" to "\uD806\uDE1E",
+            "th" to "\uD806\uDE20", "dh" to "\uD806\uDE22",
+            "t" to "\uD806\uDE1F", "d" to "\uD806\uDE21", "n" to "\uD806\uDE23",
+            "ph" to "\uD806\uDE25", "bh" to "\uD806\uDE27",
+            "p" to "\uD806\uDE24", "P" to "\uD806\uDE25", "f" to "\uD806\uDE25",
+            "b" to "\uD806\uDE26", "B" to "\uD806\uDE27",
+            "m" to "\uD806\uDE28",
+            "y" to "\uD806\uDE29", "r" to "\uD806\uDE2A",
+            "l" to "\uD806\uDE2B", "L" to "\uD806\uDE2C", "ḷ" to "\uD806\uDE2C",
+            "v" to "\uD806\uDE2D", "w" to "\uD806\uDE2D", "W" to "\uD806\uDE2D", "V" to "\uD806\uDE2D",
+            "Sh" to "\uD806\uDE2F", "sh" to "\uD806\uDE2E",
+            "S" to "\uD806\uDE2F", "ss" to "\uD806\uDE2F",
+            "s" to "\uD806\uDE2E",
+            "ś" to "\uD806\uDE2E", "ṣ" to "\uD806\uDE2F",
+            "h" to "\uD806\uDE2C", "H" to "\uD806\uDE2C",
+            "ñ" to "\uD806\uDE19", "ṅ" to "\uD806\uDE14"
         )
 
         private val nuktaConsonants = mapOf(
-            ".Dh" to "𑴙$SUKUN",
-            ".D" to "𑴘$SUKUN",
-            "q" to "𑴌$SUKUN", "Q" to "𑴌$SUKUN",
-            "z" to "𑴓$SUKUN"
+            ".Dh" to "\uD806\uDE1D$NUKTA",
+            ".D" to "\uD806\uDE1C$NUKTA",
+            "q" to "\uD806\uDE10$NUKTA", "Q" to "\uD806\uDE10$NUKTA",
+            "z" to "\uD806\uDE17$NUKTA"
         )
 
+        // Gunjala Gondi Digits: U+11950–U+11959
         private val numbers = mapOf(
-            "0" to "𑵐", "1" to "𑵑", "2" to "𑵒", "3" to "𑵓", "4" to "𑵔",
-            "5" to "𑵕", "6" to "𑵖", "7" to "𑵗", "8" to "𑵘", "9" to "𑵙"
+            "0" to "\uD806\uDE50", "1" to "\uD806\uDE51", "2" to "\uD806\uDE52",
+            "3" to "\uD806\uDE53", "4" to "\uD806\uDE54", "5" to "\uD806\uDE55",
+            "6" to "\uD806\uDE56", "7" to "\uD806\uDE57", "8" to "\uD806\uDE58",
+            "9" to "\uD806\uDE59"
         )
 
         private val maxConsonantLen = consonants.keys.maxOf { it.length }
@@ -114,7 +117,7 @@ class GondiTransliterator : Transliterator {
         if (input.isEmpty()) return ""
         val cacheKey = "$input|$isComposing"
         cache[cacheKey]?.let { return it }
-        
+
         val parts = input.split(Regex("(?<=\\s)|(?=\\s)"))
         val result = StringBuilder(input.length * 2)
         for (part in parts) {
@@ -152,16 +155,13 @@ class GondiTransliterator : Transliterator {
                 if (hasConsonant && !hasVowel) buf.append(HALANTA)
                 when {
                     i + 2 < word.length && word[i + 1] == '.' && word[i + 2] == '.' -> {
-                        buf.append("॥")
-                        i += 3
+                        buf.append("॥"); i += 3
                     }
                     i + 1 < word.length && word[i + 1] == '.' -> {
-                        buf.append("।")
-                        i += 2
+                        buf.append("।"); i += 2
                     }
                     else -> {
-                        buf.append("।")
-                        i++
+                        buf.append("।"); i++
                     }
                 }
                 hasConsonant = false
@@ -179,27 +179,18 @@ class GondiTransliterator : Transliterator {
                 continue
             }
 
-            // CHANDRABINDU (.N or MM)
+            // CHANDRABINDU / ANUSVARA
             if (matchesAt(word, i, ".N") || matchesAt(word, i, "MM")) {
-                buf.append(CHANDRABINDU)
+                buf.append(ANUSVARA)
                 i += 2
                 continue
             }
-
-            // ANUSVARA (.n .m or M-after-vowel)
             if (matchesAt(word, i, ".n") || matchesAt(word, i, ".m")) {
                 buf.append(ANUSVARA)
                 i += 2
                 continue
             }
-            if (ch == 'M') {
-                buf.append(ANUSVARA)
-                hasConsonant = false
-                hasVowel = false
-                i++
-                continue
-            }
-            if (ch == 'ṃ' || ch == 'ṁ') {
+            if (ch == 'M' || ch == 'ṃ' || ch == 'ṁ') {
                 buf.append(ANUSVARA)
                 hasConsonant = false
                 hasVowel = false
@@ -207,7 +198,7 @@ class GondiTransliterator : Transliterator {
                 continue
             }
 
-            // VISARGA (.h or H-after-vowel)
+            // VISARGA
             if (matchesAt(word, i, ".h")) {
                 buf.append(VISARGA)
                 i += 2
@@ -237,68 +228,22 @@ class GondiTransliterator : Transliterator {
                 continue
             }
 
-            // RAKAR: r after consonant without vowel
-            if (ch == 'r' && hasConsonant && !hasVowel) {
-                buf.append(RAKAR)
-                i++
-                if (i < word.length && word[i] == 'a') {
-                    val next = i + 1
-                    if (next < word.length) {
-                        when (word[next]) {
-                            'a', 'A' -> { buf.append("𑴱"); i = next + 1; hasVowel = true; continue }
-                            'i', 'I' -> { buf.append("𑴼"); i = next + 1; hasVowel = true; continue }
-                            'u', 'U' -> { buf.append("𑴿"); i = next + 1; hasVowel = true; continue }
-                        }
-                    }
-                    i++
-                    hasVowel = true
-                    continue
-                }
-                val vi = consumeVowel(word, i, buf)
-                if (vi > i) {
-                    hasVowel = true
-                    i = vi
-                } else {
-                    hasVowel = true
-                }
-                continue
-            }
-
             // NUKTA CONSONANTS
             val nuktaMatch = matchMap(word, i, nuktaConsonants, maxNuktaLen)
             if (nuktaMatch != null) {
                 if (hasConsonant && !hasVowel) buf.append(VIRAMA)
                 buf.append(nuktaMatch.first)
                 i += nuktaMatch.second
-
-                if (nuktaMatch.first.endsWith(SUKUN)) {
-                    hasConsonant = false
-                    hasVowel = true
-                } else {
-                    hasConsonant = true
-                    hasVowel = false
-                    val vi = consumeVowel(word, i, buf)
-                    if (vi > i) hasVowel = true
-                    i = vi
-                }
-                continue
-            }
-
-            // CONSONANTS
-            val consMatch = matchMap(word, i, consonants, maxConsonantLen)
-            if (consMatch != null) {
-                if (hasConsonant && !hasVowel) buf.append(VIRAMA)
-                buf.append(consMatch.first)
-                i += consMatch.second
                 hasConsonant = true
                 hasVowel = false
+                // Consume following vowel
                 if (i < word.length && word[i] == 'a') {
                     val next = i + 1
                     if (next < word.length) {
                         when (word[next]) {
-                            'a', 'A' -> { buf.append("𑴱"); i = next + 1; hasVowel = true; continue }
-                            'i', 'I' -> { buf.append("𑴼"); i = next + 1; hasVowel = true; continue }
-                            'u', 'U' -> { buf.append("𑴿"); i = next + 1; hasVowel = true; continue }
+                            'a', 'A' -> { buf.append(vowelSigns["aa"]!!); i = next + 1; hasVowel = true; continue }
+                            'i', 'I' -> { buf.append(vowelSigns["ai"]!!); i = next + 1; hasVowel = true; continue }
+                            'u', 'U' -> { buf.append(vowelSigns["au"]!!); i = next + 1; hasVowel = true; continue }
                         }
                     }
                     i++
@@ -311,10 +256,38 @@ class GondiTransliterator : Transliterator {
                 continue
             }
 
-            // INDEPENDENT VOWELS — FIX: use VIRAMA not HALANTA
+            // CONSONANTS
+            val consMatch = matchMap(word, i, consonants, maxConsonantLen)
+            if (consMatch != null) {
+                if (hasConsonant && !hasVowel) buf.append(VIRAMA)
+                buf.append(consMatch.first)
+                i += consMatch.second
+                hasConsonant = true
+                hasVowel = false
+                // Consume following vowel
+                if (i < word.length && word[i] == 'a') {
+                    val next = i + 1
+                    if (next < word.length) {
+                        when (word[next]) {
+                            'a', 'A' -> { buf.append(vowelSigns["aa"]!!); i = next + 1; hasVowel = true; continue }
+                            'i', 'I' -> { buf.append(vowelSigns["ai"]!!); i = next + 1; hasVowel = true; continue }
+                            'u', 'U' -> { buf.append(vowelSigns["au"]!!); i = next + 1; hasVowel = true; continue }
+                        }
+                    }
+                    i++
+                    hasVowel = true
+                    continue
+                }
+                val vi = consumeVowel(word, i, buf)
+                if (vi > i) hasVowel = true
+                i = vi
+                continue
+            }
+
+            // INDEPENDENT VOWELS
             val indMatch = matchMap(word, i, independentVowels, maxIndVowelLen)
             if (indMatch != null) {
-                if (hasConsonant && !hasVowel) buf.append(VIRAMA)  // ← CHANGED
+                if (hasConsonant && !hasVowel) buf.append(VIRAMA)
                 buf.append(indMatch.first)
                 i += indMatch.second
                 hasConsonant = false
@@ -328,15 +301,15 @@ class GondiTransliterator : Transliterator {
                 continue
             }
 
-            // UNMATCHED — FIX: use VIRAMA not HALANTA
-            if (hasConsonant && !hasVowel) buf.append(VIRAMA)  // ← CHANGED
+            // UNMATCHED
+            if (hasConsonant && !hasVowel) buf.append(VIRAMA)
             buf.append(ch)
             hasConsonant = false
             hasVowel = false
             i++
         }
 
-        // ONLY at the very end, for truly final consonants
+        // Only add halanta for truly final consonants when not composing
         if (hasConsonant && !hasVowel && !isComposing) {
             buf.append(HALANTA)
         }
@@ -357,7 +330,7 @@ class GondiTransliterator : Transliterator {
     private fun isFollowedByConsonant(word: String, pos: Int): Boolean {
         if (pos >= word.length) return false
         return matchMap(word, pos, consonants, maxConsonantLen) != null ||
-               matchMap(word, pos, nuktaConsonants, maxNuktaLen) != null
+                matchMap(word, pos, nuktaConsonants, maxNuktaLen) != null
     }
 
     private fun matchMap(
@@ -380,9 +353,9 @@ class GondiTransliterator : Transliterator {
     }
 
     private fun startsSpecialDot(word: String, i: Int): Boolean =
-        matchesAt(word, i, ".r") || matchesAt(word, i, ".D") ||
-        matchesAt(word, i, ".n") || matchesAt(word, i, ".m") ||
-        matchesAt(word, i, ".h") || matchesAt(word, i, ".N")
+        matchesAt(word, i, ".r") || matchesAt(word, i, ".Dh") || matchesAt(word, i, ".D") ||
+                matchesAt(word, i, ".n") || matchesAt(word, i, ".m") ||
+                matchesAt(word, i, ".h") || matchesAt(word, i, ".N")
 
     override fun getSuggestions(input: String, limit: Int): List<String> = emptyList()
 }

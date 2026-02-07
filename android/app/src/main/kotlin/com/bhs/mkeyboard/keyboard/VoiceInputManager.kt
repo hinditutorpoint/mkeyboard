@@ -57,38 +57,43 @@ class VoiceInputManager(private val context: Context) {
         currentLanguage = when (language) {
             KeyboardLanguage.ENGLISH -> "en-US"
             KeyboardLanguage.HINDI -> "hi-IN"
-            KeyboardLanguage.GONDI -> "hi-IN" // Fallback to Hindi for Gondi
+            KeyboardLanguage.GONDI -> "hi-IN"
         }
 
-        // Release previous recognizer
+        // Check actual permission state
+        val permission = androidx.core.content.ContextCompat.checkSelfPermission(
+            context, android.Manifest.permission.RECORD_AUDIO
+        )
+        if (permission != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            _state.value = VoiceState.NO_PERMISSION
+            _errorMessage.value = "Permission denied"
+            return
+        }
+
         stopListening()
 
         try {
-            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
+            // Try to find Google's recognition service explicitely
+            val componentName = findRecognitionComponent(context)
+            Log.d(TAG, "Creating SpeechRecognizer with component: $componentName")
+
+            speechRecognizer = if (componentName != null) {
+                SpeechRecognizer.createSpeechRecognizer(context, componentName)
+            } else {
+                SpeechRecognizer.createSpeechRecognizer(context)
+            }.apply {
                 setRecognitionListener(createListener())
             }
 
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                putExtra(
-                    RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-                )
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE, currentLanguage)
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, currentLanguage)
                 putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
                 putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
-                putExtra(
-                    RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS,
-                    3000L
-                )
-                putExtra(
-                    RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS,
-                    1500L
-                )
-                putExtra(
-                    RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS,
-                    1500L
-                )
+                putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName)
+                // Prefer offline recognition if available
+                putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
             }
 
             _state.value = VoiceState.LISTENING
@@ -112,7 +117,7 @@ class VoiceInputManager(private val context: Context) {
             speechRecognizer?.destroy()
             speechRecognizer = null
         } catch (e: Exception) {
-            Log.e(TAG, "Error stopping speech recognition", e)
+            Log.e(TAG, "Error stopping", e)
         }
         if (_state.value == VoiceState.LISTENING) {
             _state.value = VoiceState.IDLE
@@ -130,45 +135,24 @@ class VoiceInputManager(private val context: Context) {
 
     private fun createListener(): RecognitionListener {
         return object : RecognitionListener {
-
-            override fun onReadyForSpeech(params: Bundle?) {
-                Log.d(TAG, "Ready for speech")
-                _state.value = VoiceState.LISTENING
-            }
-
-            override fun onBeginningOfSpeech() {
-                Log.d(TAG, "Speech started")
-            }
-
+            override fun onReadyForSpeech(params: Bundle?) { _state.value = VoiceState.LISTENING }
+            override fun onBeginningOfSpeech() {}
             override fun onRmsChanged(rmsdB: Float) {
-                // Normalize volume: RMS typically ranges from -2 to 10
-                val normalized = ((rmsdB + 2f) / 12f).coerceIn(0f, 1f)
+                 val normalized = ((rmsdB + 2f) / 12f).coerceIn(0f, 1f)
                 _volumeLevel.value = normalized
             }
-
             override fun onBufferReceived(buffer: ByteArray?) {}
-
-            override fun onEndOfSpeech() {
-                Log.d(TAG, "Speech ended")
-                _state.value = VoiceState.PROCESSING
+            override fun onEndOfSpeech() { 
+                _state.value = VoiceState.PROCESSING 
                 _volumeLevel.value = 0f
             }
-
             override fun onError(error: Int) {
                 val message = when (error) {
-                    SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
-                    SpeechRecognizer.ERROR_CLIENT -> "Client error"
                     SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "No permission"
-                    SpeechRecognizer.ERROR_NETWORK -> "Network error"
-                    SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network timeout"
                     SpeechRecognizer.ERROR_NO_MATCH -> "No speech detected"
-                    SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Recognizer busy"
-                    SpeechRecognizer.ERROR_SERVER -> "Server error"
-                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech heard"
-                    else -> "Unknown error ($error)"
+                    else -> "Error $error"
                 }
                 Log.e(TAG, "Speech error: $message")
-
                 if (error == SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS) {
                     _state.value = VoiceState.NO_PERMISSION
                 } else {
@@ -177,30 +161,41 @@ class VoiceInputManager(private val context: Context) {
                 _errorMessage.value = message
                 _volumeLevel.value = 0f
             }
-
             override fun onResults(results: Bundle?) {
-                val matches = results?.getStringArrayList(
-                    SpeechRecognizer.RESULTS_RECOGNITION
-                )
+                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 val bestResult = matches?.firstOrNull() ?: ""
-                Log.d(TAG, "Final result: $bestResult")
-
                 _finalResult.value = bestResult
                 _partialResult.value = ""
                 _state.value = VoiceState.IDLE
                 _volumeLevel.value = 0f
             }
-
             override fun onPartialResults(partialResults: Bundle?) {
-                val matches = partialResults?.getStringArrayList(
-                    SpeechRecognizer.RESULTS_RECOGNITION
-                )
+                val matches = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 val partial = matches?.firstOrNull() ?: ""
-                Log.d(TAG, "Partial: $partial")
                 _partialResult.value = partial
             }
-
             override fun onEvent(eventType: Int, params: Bundle?) {}
+        }
+    }
+
+    private fun findRecognitionComponent(context: Context): android.content.ComponentName? {
+        try {
+            val pm = context.packageManager
+            val intent = Intent(android.speech.RecognitionService.SERVICE_INTERFACE)
+            val list = pm.queryIntentServices(intent, 0)
+            
+            // Prefer Google
+            val google = list.find { it.serviceInfo.packageName.contains("google", true) }
+            return if (google != null) {
+                android.content.ComponentName(google.serviceInfo.packageName, google.serviceInfo.name)
+            } else {
+                list.firstOrNull()?.let {
+                    android.content.ComponentName(it.serviceInfo.packageName, it.serviceInfo.name)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error finding recognition service", e)
+            return null
         }
     }
 }

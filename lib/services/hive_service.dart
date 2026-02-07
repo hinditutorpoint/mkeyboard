@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../models/keyboard_settings.dart';
 import '../models/custom_word.dart';
 
@@ -74,7 +75,12 @@ class HiveService {
         if (_customWordsBox.isEmpty) {
           await _addDefaultWords();
         }
-        // Initial sync to SharedPreferences for native keyboard
+        if (_customWordsBox.isEmpty) {
+          await _addDefaultWords();
+        }
+        // Sync FROM SharedPreferences to get any new Native-learned words
+        await syncFromNative();
+        // Then Sync TO SharedPreferences to ensure consistency
         await _syncCustomWordsToSharedPreferences();
       }
     } catch (e) {
@@ -281,19 +287,16 @@ class HiveService {
     try {
       final prefs = await SharedPreferences.getInstance();
 
-      await prefs.setString('flutter.themeName', settings.themeName);
-      await prefs.setBool('flutter.hapticFeedback', settings.hapticFeedback);
-      await prefs.setBool('flutter.soundOnKeyPress', settings.soundOnKeyPress);
-      await prefs.setBool('flutter.showSuggestions', settings.showSuggestions);
-      await prefs.setBool('flutter.autoCapitalize', settings.autoCapitalize);
-      await prefs.setBool('flutter.showNumberRow', settings.showNumberRow);
-      await prefs.setDouble('flutter.keyHeight', settings.keyHeight);
-      await prefs.setDouble('flutter.fontSize', settings.fontSize);
-      await prefs.setInt(
-        'flutter.defaultLanguageIndex',
-        settings.defaultLanguageIndex,
-      );
-      await prefs.setDouble('flutter.keySpacing', settings.keySpacing);
+      await prefs.setString('themeName', settings.themeName);
+      await prefs.setBool('hapticFeedback', settings.hapticFeedback);
+      await prefs.setBool('soundOnKeyPress', settings.soundOnKeyPress);
+      await prefs.setBool('showSuggestions', settings.showSuggestions);
+      await prefs.setBool('autoCapitalize', settings.autoCapitalize);
+      await prefs.setBool('showNumberRow', settings.showNumberRow);
+      await prefs.setDouble('keyHeight', settings.keyHeight);
+      await prefs.setDouble('fontSize', settings.fontSize);
+      await prefs.setInt('defaultLanguageIndex', settings.defaultLanguageIndex);
+      await prefs.setDouble('keySpacing', settings.keySpacing);
 
       debugPrint('Settings synced to SharedPreferences');
     } catch (e) {
@@ -301,8 +304,6 @@ class HiveService {
     }
   }
 
-  /// Sync custom words to SharedPreferences as JSON so native Kotlin keyboard can read them.
-  /// Called whenever custom words are added, updated, or deleted.
   static Future<void> _syncCustomWordsToSharedPreferences() async {
     try {
       if (!Hive.isBoxOpen(customWordsBoxName)) return;
@@ -323,16 +324,85 @@ class HiveService {
           )
           .toList();
 
-      final jsonString = jsonList.isNotEmpty
-          ? '[${jsonList.map((m) => '{"english":"${m['english']}","translated":"${m['translated']}","language":${m['language']},"usageCount":${m['usageCount']},"isPinned":${m['isPinned']}}').join(',')}]'
-          : '[]';
+      // Use jsonEncode for safe serialization
+      final jsonString = jsonEncode(jsonList);
 
-      await prefs.setString('flutter.customWords', jsonString);
+      await prefs.setString('customWords', jsonString);
       debugPrint(
         'Custom words synced to SharedPreferences: ${words.length} words',
       );
     } catch (e) {
       debugPrint('Error syncing custom words to SharedPreferences: $e');
+    }
+  }
+
+  /// Syncs words FROM SharedPreferences (updated by native keyboard) INTO Hive.
+  /// Call this when entering the app or refreshing the custom words list.
+  static Future<void> syncFromNative() async {
+    try {
+      if (!Hive.isBoxOpen(customWordsBoxName)) return;
+
+      final prefs = await SharedPreferences.getInstance();
+      final jsonString = prefs.getString('customWords');
+      if (jsonString == null || jsonString == '[]') return;
+
+      final List<dynamic> jsonList = jsonDecode(jsonString);
+      final box = _customWordsBox;
+      bool changed = false;
+
+      for (final item in jsonList) {
+        if (item is Map<String, dynamic>) {
+          final english = item['english'] as String? ?? '';
+          final translated = item['translated'] as String? ?? '';
+          final language = item['language'] as int? ?? 0;
+          final usageCount = item['usageCount'] as int? ?? 0;
+          // isPinned might be missing in older entries
+          final isPinned = item['isPinned'] as bool? ?? false;
+
+          if (english.isNotEmpty) {
+            // Find existing word in Hive
+            final existingKey = box.values.cast<CustomWord?>().firstWhere(
+              (w) =>
+                  w != null &&
+                  w.englishWord == english &&
+                  w.languageIndex == language,
+              orElse: () => null,
+            );
+
+            if (existingKey != null) {
+              // Update usage count if higher
+              if (usageCount > existingKey.usageCount) {
+                final idx = box.values.toList().indexOf(existingKey);
+                await box.putAt(
+                  idx,
+                  existingKey.copyWith(usageCount: usageCount),
+                );
+                changed = true;
+              }
+            } else {
+              // Add new word
+              await box.add(
+                CustomWord(
+                  englishWord: english,
+                  translatedWord: translated,
+                  languageIndex:
+                      language, // Use 'language' from JSON, not 'languageIndex' from method signature
+                  usageCount: usageCount,
+                  isPinned: isPinned,
+                  createdAt: DateTime.now(),
+                ),
+              );
+              changed = true;
+            }
+          }
+        }
+      }
+
+      if (changed) {
+        debugPrint('Imported new words/usage from SharedPreferences');
+      }
+    } catch (e) {
+      debugPrint('Error importing from SharedPreferences: $e');
     }
   }
 

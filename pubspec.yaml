@@ -42,6 +42,8 @@ flutter:
     - assets/logo/
     - assets/suggestions/hindi_words.json
     - assets/suggestions/gondi_words.json
+    - assets/suggestions/suggestions.json
+    - assets/dictionary/
 
   fonts:
     # Hindi Font

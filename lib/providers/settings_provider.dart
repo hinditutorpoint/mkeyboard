@@ -193,6 +193,8 @@ class CustomWordsNotifier extends StateNotifier<AsyncValue<List<CustomWord>>> {
 
   Future<void> _loadCustomWords() async {
     try {
+      // Always sync from SharedPreferences first to get latest native-learned words
+      await HiveService.syncFromNative();
       final words = HiveService.getAllCustomWords();
       if (_alive) state = AsyncValue.data(words);
     } catch (e, st) {

@@ -49,6 +49,7 @@
             android:name=".HindiKeyboardService"
             android:label="Hindi &amp; Gondi Keyboard"
             android:permission="android.permission.BIND_INPUT_METHOD"
+            android:foregroundServiceType="microphone"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.view.InputMethod" />
@@ -82,6 +83,9 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
         </intent>
     </queries>
 </manifest>

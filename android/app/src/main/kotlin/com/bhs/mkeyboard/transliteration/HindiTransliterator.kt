@@ -17,7 +17,7 @@ class HindiTransliterator : Transliterator {
             "au" to "औ", "aU" to "औ", "ou" to "औ",
             "A" to "आ", "I" to "ई", "U" to "ऊ",
             "E" to "ऐ", "O" to "औ",
-            "Ri" to "ऋ", ".r" to "ऋ",
+            "Ri" to "ऋ", ".r" to "ऋ", "R" to "ऋ",
             "a" to "अ", "i" to "इ", "u" to "उ",
             "e" to "ए", "o" to "ओ",
             "ā" to "आ", "ī" to "ई", "ū" to "ऊ",
@@ -31,7 +31,7 @@ class HindiTransliterator : Transliterator {
             "au" to "ौ", "aU" to "ौ", "ou" to "ौ",
             "A" to "ा", "I" to "ी", "U" to "ू",
             "E" to "ै", "O" to "ौ",
-            "Ri" to "ृ", ".r" to "ृ",
+            "Ri" to "ृ", ".r" to "ृ", "R" to "ृ",
             "i" to "ि", "u" to "ु",
             "e" to "े", "o" to "ो",
             "ā" to "ा", "ī" to "ी", "ū" to "ू",
@@ -43,7 +43,7 @@ class HindiTransliterator : Transliterator {
             "shh" to "ष", "chh" to "छ",
             "kh" to "ख", "Kh" to "ख",
             "gh" to "घ", "Gh" to "घ",
-            "ng" to "ङ", "~N" to "ङ", "N^" to "ङ",
+            "ng" to "ंग", "~N" to "ङ", "N^" to "ङ",
             "k" to "क", "K" to "क",
             "g" to "ग", "G" to "ग",
             "Ch" to "छ",
@@ -60,17 +60,17 @@ class HindiTransliterator : Transliterator {
             "th" to "थ", "dh" to "ध",
             "t" to "त", "d" to "द", "n" to "न",
             "ph" to "फ", "bh" to "भ", "Bh" to "भ",
-            "p" to "प", "P" to "फ", "f" to "फ",
+            "p" to "प", "P" to "फ", "f" to "फ", "F" to "फ़",
             "b" to "ब", "B" to "ब",
-            "m" to "म",
-            "y" to "य", "r" to "र",
+            "m" to "म", "M" to "ड़",
+            "y" to "य", "Y" to "ञ", "r" to "र",
             "l" to "ल", "L" to "ल", "ḷ" to "ल",
             "v" to "व", "w" to "व", "W" to "व", "V" to "व",
             "Sh" to "ष", "sh" to "श",
             "S" to "ष", "ss" to "ष",
             "s" to "स",
             "ś" to "श", "ṣ" to "ष",
-            "h" to "ह",
+            "h" to "ह", "H" to "ह",
             "x" to "क्ष", "X" to "क्ष",
             "Z" to "त्र",
             "ñ" to "ञ", "ṅ" to "ङ"
@@ -103,21 +103,26 @@ class HindiTransliterator : Transliterator {
     )
 
     override fun transliterate(input: String): String {
-        if (input.isEmpty()) return ""
-        cache[input]?.let { return it }
+        return transliterate(input, isComposing = false)
+    }
 
+    override fun transliterate(input: String, isComposing: Boolean): String {
+        if (input.isEmpty()) return ""
+        val cacheKey = "$input|$isComposing"
+        cache[cacheKey]?.let { return it }
+        
         val parts = input.split(Regex("(?<=\\s)|(?=\\s)"))
         val result = StringBuilder(input.length * 2)
         for (part in parts) {
             if (part.isBlank()) result.append(part)
-            else result.append(transliterateWord(part))
+            else result.append(transliterateWord(part, isComposing))
         }
         val output = result.toString()
-        cache[input] = output
+        cache[cacheKey] = output
         return output
     }
 
-    private fun transliterateWord(word: String): String {
+    private fun transliterateWord(word: String, isComposing: Boolean): String {
         if (word.isEmpty()) return ""
         val buf = StringBuilder(word.length * 2)
         var i = 0
@@ -176,13 +181,7 @@ class HindiTransliterator : Transliterator {
                 i += 2
                 continue
             }
-            if (ch == 'M' && hasVowel) {
-                buf.append(ANUSVARA)
-                hasConsonant = false
-                hasVowel = false
-                i++
-                continue
-            }
+
             if (ch == 'ṃ' || ch == 'ṁ') {
                 buf.append(ANUSVARA)
                 hasConsonant = false
@@ -265,7 +264,9 @@ class HindiTransliterator : Transliterator {
             i++
         }
 
-        if (hasConsonant && !hasVowel) buf.append(HALANTA)
+        if (hasConsonant && !hasVowel && !isComposing) {
+            buf.append(HALANTA)  // Hindi uses ् (U+094D)
+        }
         return buf.toString()
     }
 

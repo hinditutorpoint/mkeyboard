@@ -62,7 +62,10 @@ class HindiKeyboardService : InputMethodService(),
     private val hindiTransliterator = HindiTransliterator()
     private val gondiTransliterator = GondiTransliterator()
     private var currentTransliterator: Transliterator? = null
-    private var currentLanguage = KeyboardLanguage.ENGLISH
+    var currentLanguage by mutableStateOf(KeyboardLanguage.ENGLISH)
+        private set
+    var isShifted by mutableStateOf(false)
+        private set
 
     private var composingTextState by mutableStateOf("")
     private var transliteratedTextState by mutableStateOf("")
@@ -102,6 +105,7 @@ class HindiKeyboardService : InputMethodService(),
 
     // Settings
     private lateinit var keyboardSettings: KeyboardSettings
+    private lateinit var suggestionEngine: SuggestionEngine
 
     override val lifecycle: Lifecycle get() = lifecycleRegistry
     override val viewModelStore: ViewModelStore get() = store
@@ -126,6 +130,10 @@ class HindiKeyboardService : InputMethodService(),
         glideDetector = GlideTypingDetector()
         glideDictionary = GlideDictionary(this)
         coroutineScope?.launch { glideDictionary.load() }
+
+        // Initialize suggestion engine
+        suggestionEngine = SuggestionEngine.getInstance(this)
+
 
         // Observe voice state
         coroutineScope?.launch {
@@ -180,6 +188,9 @@ class HindiKeyboardService : InputMethodService(),
 
         composeView.setContent {
             KeyboardView(
+                currentLanguage = currentLanguage,
+                isShifted = isShifted,
+                onShiftChanged = { isShifted = it },
                 onInput = { text, isRaw -> handleInput(text, isRaw) },
                 onBackspace = { handleBackspace() },
                 onEnter = { handleAction() },
@@ -208,7 +219,8 @@ class HindiKeyboardService : InputMethodService(),
                 glideTrailPoints = glideTrailPoints,
                 glideSuggestions = glideSuggestions,
                 isGlideActive = isGlideActive,
-                onGlideSuggestionSelected = { handleGlideSuggestionSelected(it) }
+                onGlideSuggestionSelected = { handleGlideSuggestionSelected(it) },
+                nextWordSuggestions = nextWordSuggestions
             )
         }
 
@@ -237,6 +249,58 @@ class HindiKeyboardService : InputMethodService(),
             currentLanguage = savedLang
             updateTransliterator(currentLanguage)
         }
+        updateShiftState()
+    }
+
+    private var nextWordSuggestions by mutableStateOf(emptyList<String>())
+
+    override fun onUpdateSelection(
+        oldSelStart: Int, oldSelEnd: Int,
+        newSelStart: Int, newSelEnd: Int,
+        candidatesStart: Int, candidatesEnd: Int
+    ) {
+        super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd)
+        updateShiftState()
+        updateNextWordSuggestions()
+    }
+
+    private fun updateNextWordSuggestions() {
+        if (composingTextState.isNotEmpty()) {
+            nextWordSuggestions = emptyList()
+            return
+        }
+
+        val ic = currentInputConnection ?: return
+        val textBefore = ic.getTextBeforeCursor(50, 0) ?: ""
+        val lastWord = textBefore.trim().split(Regex("\\s+")).lastOrNull() ?: ""
+        
+        if (lastWord.isNotEmpty()) {
+             // Determine language index: English=0, Hindi=1, Gondi=2
+            val langIndex = when (currentLanguage) {
+                KeyboardLanguage.ENGLISH -> 0
+                KeyboardLanguage.HINDI -> 1
+                KeyboardLanguage.GONDI -> 2
+            }
+            nextWordSuggestions = suggestionEngine.getNextWordSuggestions(lastWord, langIndex)
+        } else {
+            nextWordSuggestions = emptyList()
+        }
+    }
+
+    private fun updateShiftState() {
+        if (!keyboardSettings.autoCapitalize) return
+
+        // Auto-capitalize is only for English.
+        // For Hindi/Gondi, auto-shift interferes with transliteration (e.g. n vs N).
+        // We force it off on selection update to simulate "auto-unshift" after typing.
+        if (currentLanguage != KeyboardLanguage.ENGLISH) {
+            isShifted = false
+            return
+        }
+
+        val ic = currentInputConnection ?: return
+        val capsMode = ic.getCursorCapsMode(inputConfig.inputType)
+        isShifted = capsMode != 0
     }
 
     // ── Action button handling ──────────────────────────────────────
@@ -292,7 +356,8 @@ class HindiKeyboardService : InputMethodService(),
 
         val transliterator = currentTransliterator
         if (transliterator != null) {
-            val transliterated = transliterator.transliterate(composingTextState)
+            // FIX: isComposing = true while typing
+            val transliterated = transliterator.transliterate(composingTextState, isComposing = true)
             transliteratedTextState = transliterated
             setComposingText(transliterated)
         } else {
@@ -315,12 +380,16 @@ class HindiKeyboardService : InputMethodService(),
             composingTextState = composingTextState.dropLast(1)
             if (composingTextState.isEmpty()) {
                 transliteratedTextState = ""
+                // FIX: Clear composing text properly, don't deleteBackward
+                currentInputConnection?.setComposingText("", 0)
                 currentInputConnection?.finishComposingText()
-                deleteBackward()
             } else {
                 val transliterator = currentTransliterator
                 if (transliterator != null) {
-                    val transliterated = transliterator.transliterate(composingTextState)
+                    // FIX: isComposing = true while typing
+                    val transliterated = transliterator.transliterate(
+                        composingTextState, isComposing = true
+                    )
                     transliteratedTextState = transliterated
                     setComposingText(transliterated)
                 } else {
@@ -338,13 +407,32 @@ class HindiKeyboardService : InputMethodService(),
         commitText(" ")
     }
 
-    private fun commitPendingComposing() {
+    private fun commitPendingComposing(): Boolean {
+        var viramaStripped = false
         if (composingTextState.isNotEmpty()) {
             val transliterator = currentTransliterator
-            val finalText = transliterator?.transliterate(composingTextState) ?: composingTextState
+            // FIX: isComposing = false when committing (adds halanta if needed)
+            val finalText = transliterator?.transliterate(
+                composingTextState, isComposing = false
+            ) ?: composingTextState
+
+            // FIX: No manual halanta stripping needed anymore
+            // The transliterator handles it:
+            //   isComposing=true  → no trailing halanta (while typing)
+            //   isComposing=false → has trailing halanta (on commit)
+
             commitText(finalText)
+
+            val langIndex = when (currentLanguage) {
+                KeyboardLanguage.ENGLISH -> 0
+                KeyboardLanguage.HINDI -> 1
+                KeyboardLanguage.GONDI -> 2
+            }
+            suggestionEngine.learnWord(composingTextState, finalText, langIndex)
+
             resetComposing()
         }
+        return viramaStripped
     }
 
     private fun resetComposing() {
@@ -503,7 +591,19 @@ class HindiKeyboardService : InputMethodService(),
     }
 
     private fun deleteBackward() {
-        currentInputConnection?.deleteSurroundingText(1, 0)
+        val ic = currentInputConnection ?: return
+
+        // Get text before cursor to check for supplementary characters
+        val before = ic.getTextBeforeCursor(2, 0) ?: ""
+
+        if (before.isNotEmpty()) {
+            // Get the last CODE POINT (not Char)
+            val lastCodePoint = Character.codePointBefore(before, before.length)
+            val charCount = Character.charCount(lastCodePoint)
+
+            // Delete the correct number of Char units
+            ic.deleteSurroundingText(charCount, 0)
+        }
     }
 
     private fun openApp() {

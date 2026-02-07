@@ -34,6 +34,7 @@ object ImeActionHelper {
         val keyboardType: KeyboardType,
         val actionButton: ActionButton,
         val imeAction: Int,
+        val inputType: Int = 0,
         val disableSuggestions: Boolean = false,
         val disableTransliteration: Boolean = false
     )
@@ -72,6 +73,7 @@ object ImeActionHelper {
             keyboardType = keyboardType,
             actionButton = actionButton,
             imeAction = imeAction,
+            inputType = inputType,
             disableSuggestions = noSuggestions || keyboardType == KeyboardType.PASSWORD,
             disableTransliteration = disableTranslit
         )
