@@ -76,6 +76,9 @@ android {
         
         // Kotlinx Serialization
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+
+        // Fix for NoClassDefFoundError: PacProcessor on older Android versions
+        implementation("androidx.webkit:webkit:1.12.0")
     }
 }
 

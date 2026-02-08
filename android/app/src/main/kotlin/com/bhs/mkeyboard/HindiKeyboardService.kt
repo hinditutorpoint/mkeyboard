@@ -37,6 +37,8 @@ import com.bhs.mkeyboard.keyboard.*
 import com.bhs.mkeyboard.transliteration.Transliterator
 import com.bhs.mkeyboard.transliteration.HindiTransliterator
 import com.bhs.mkeyboard.transliteration.GondiTransliterator
+import com.bhs.mkeyboard.transliteration.GunjalaTransliterator
+import com.bhs.mkeyboard.transliteration.ChikiTransliterator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -61,6 +63,8 @@ class HindiKeyboardService : InputMethodService(),
 
     private val hindiTransliterator = HindiTransliterator()
     private val gondiTransliterator = GondiTransliterator()
+    private val gunjalaTransliterator = GunjalaTransliterator()
+    private val chikiTransliterator = ChikiTransliterator()
     private var currentTransliterator: Transliterator? = null
     var currentLanguage by mutableStateOf(KeyboardLanguage.ENGLISH)
         private set
@@ -280,6 +284,8 @@ class HindiKeyboardService : InputMethodService(),
                 KeyboardLanguage.ENGLISH -> 0
                 KeyboardLanguage.HINDI -> 1
                 KeyboardLanguage.GONDI -> 2
+                KeyboardLanguage.GUNJALA -> 3
+                KeyboardLanguage.CHIKI -> 4
             }
             nextWordSuggestions = suggestionEngine.getNextWordSuggestions(lastWord, langIndex)
         } else {
@@ -339,6 +345,8 @@ class HindiKeyboardService : InputMethodService(),
             currentTransliterator = when (lang) {
                 KeyboardLanguage.HINDI -> hindiTransliterator
                 KeyboardLanguage.GONDI -> gondiTransliterator
+                KeyboardLanguage.GUNJALA -> gunjalaTransliterator
+                KeyboardLanguage.CHIKI -> chikiTransliterator
                 KeyboardLanguage.ENGLISH -> null
             }
         }
@@ -427,6 +435,8 @@ class HindiKeyboardService : InputMethodService(),
                 KeyboardLanguage.ENGLISH -> 0
                 KeyboardLanguage.HINDI -> 1
                 KeyboardLanguage.GONDI -> 2
+                KeyboardLanguage.GUNJALA -> 3
+                KeyboardLanguage.CHIKI -> 4
             }
             suggestionEngine.learnWord(composingTextState, finalText, langIndex)
 

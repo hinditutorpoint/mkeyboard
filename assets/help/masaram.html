@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="gon">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masaram Gondi Typing Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        @font-face {
+            font-family: 'NotoSansMasaramGondi';
+            src: url('file:///android_asset/flutter_assets/assets/fonts/NotoSansMasaramGondi-Regular.ttf');
+        }
+
+        body {
+            font-family: 'NotoSansMasaramGondi', system-ui, -apple-system, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            padding: 12px;
+            line-height: 1.6
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1B5E20, #43A047);
+            color: #fff;
+            padding: 20px 16px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            text-align: center
+        }
+
+        .header h1 {
+            font-size: 22px;
+            margin-bottom: 4px
+        }
+
+        .header p {
+            font-size: 13px;
+            opacity: 0.9
+        }
+
+        .section {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1)
+        }
+
+        .section h2 {
+            font-size: 16px;
+            color: #2E7D32;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #E8F5E9
+        }
+
+        .section h3 {
+            font-size: 14px;
+            color: #555;
+            margin: 10px 0 6px
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0
+        }
+
+        th {
+            background: #E8F5E9;
+            color: #1B5E20;
+            padding: 8px 6px;
+            text-align: left;
+            font-size: 12px;
+            border-bottom: 2px solid #C8E6C9
+        }
+
+        td {
+            padding: 7px 6px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px
+        }
+
+        td:first-child {
+            font-weight: 600;
+            color: #2E7D32;
+            font-size: 18px
+        }
+
+        td:nth-child(2) {
+            font-family: monospace;
+            background: #f8f8f8;
+            border-radius: 4px;
+            padding: 4px 8px;
+            color: #333
+        }
+
+        .note {
+            background: #FFF8E1;
+            border-left: 3px solid #FFB300;
+            padding: 10px 12px;
+            border-radius: 0 8px 8px 0;
+            margin: 8px 0;
+            font-size: 12px
+        }
+
+        .tip {
+            background: #E8F5E9;
+            border-left: 3px solid #4CAF50;
+            padding: 10px 12px;
+            border-radius: 0 8px 8px 0;
+            margin: 8px 0;
+            font-size: 12px
+        }
+
+        .example {
+            background: #E3F2FD;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin: 6px 0;
+            font-size: 13px
+        }
+
+        .example span {
+            font-weight: 600;
+            color: #1565C0
+        }
+
+        .badge {
+            display: inline-block;
+            background: #2E7D32;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            margin-left: 4px
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #1B5E20, #43A047);
+            color: #fff;
+            padding: 20px 16px;
+            border-radius: 16px;
+            margin-top: 16px;
+            text-align: center
+        }
+
+        .footer h3 {
+            font-size: 16px;
+            margin-bottom: 6px
+        }
+
+        .footer p {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px
+        }
+
+        .footer a {
+            color: #A5D6A7;
+            text-decoration: none;
+            font-weight: 600
+        }
+
+        .support {
+            background: linear-gradient(135deg, #FF6B00, #FF9800);
+            color: #fff;
+            padding: 16px;
+            border-radius: 16px;
+            margin-top: 12px;
+            text-align: center
+        }
+
+        .support h3 {
+            font-size: 15px;
+            margin-bottom: 6px
+        }
+
+        .support a {
+            color: #FFF9C4;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 6px;
+            margin: 8px 0
+        }
+
+        .grid-item {
+            background: #E8F5E9;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center
+        }
+
+        .grid-item .char {
+            font-size: 22px;
+            color: #1B5E20
+        }
+
+        .grid-item .label {
+            font-size: 10px;
+            color: #888;
+            margin-top: 2px
+        }
+
+        .info-box {
+            background: #E3F2FD;
+            border: 1px solid #90CAF9;
+            padding: 12px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-size: 12px
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>𑴌𑴽 Masaram Gondi Typing Guide</h1>
+        <p>𑴤𑴫𑴦𑴱𑴤 𑴎𑴽𑵀𑴘𑴲 — Learn to type in Masaram Gondi Script</p>
+    </div>
+
+    <div class="info-box">
+        ℹ️ <b>About Masaram Gondi:</b> An ancient script used by the Gond people of Central India. Created by Munshi
+        Mangal Singh Masaram. Unicode range: U+11D00–U+11D5F.
+    </div>
+
+    <!-- Vowels -->
+    <div class="section">
+        <h2>𑴀 Vowels (स्वर)</h2>
+        <h3>Independent Vowels</h3>
+        <table>
+            <tr>
+                <th>Gondi</th>
+                <th>Type</th>
+                <th>Sound</th>
+            </tr>
+            <tr>
+                <td>𑴀</td>
+                <td>a</td>
+                <td>a (short)</td>
+            </tr>
+            <tr>
+                <td>𑴁</td>
+                <td>aa / A</td>
+                <td>aa (long)</td>
+            </tr>
+            <tr>
+                <td>𑴂</td>
+                <td>i</td>
+                <td>i (short)</td>
+            </tr>
+            <tr>
+                <td>𑴃</td>
+                <td>ee / I</td>
+                <td>ii (long)</td>
+            </tr>
+            <tr>
+                <td>𑴄</td>
+                <td>u</td>
+                <td>u (short)</td>
+            </tr>
+            <tr>
+                <td>𑴅</td>
+                <td>oo / U</td>
+                <td>uu (long)</td>
+            </tr>
+            <tr>
+                <td>𑴆</td>
+                <td>e</td>
+                <td>e (short)</td>
+            </tr>
+            <tr>
+                <td>𑴇</td>
+                <td>Ri / .r</td>
+                <td>ri (vocalic)</td>
+            </tr>
+            <tr>
+                <td>𑴈</td>
+                <td>ai / E</td>
+                <td>ai (diphthong)</td>
+            </tr>
+            <tr>
+                <td>𑴉</td>
+                <td>o / O</td>
+                <td>o</td>
+            </tr>
+            <tr>
+                <td>𑴋</td>
+                <td>au</td>
+                <td>au (diphthong)</td>
+            </tr>
+        </table>
+
+        <h3>Vowel Signs (Matras) — after consonant</h3>
+        <table>
+            <tr>
+                <th>Matra</th>
+                <th>Type</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td>𑴱</td>
+                <td>aa</td>
+                <td>k + aa = 𑴌𑴱</td>
+            </tr>
+            <tr>
+                <td>𑴲</td>
+                <td>i</td>
+                <td>k + i = 𑴌𑴲</td>
+            </tr>
+            <tr>
+                <td>𑴳</td>
+                <td>ee</td>
+                <td>k + ee = 𑴌𑴳</td>
+            </tr>
+            <tr>
+                <td>𑴴</td>
+                <td>u</td>
+                <td>k + u = 𑴌𑴴</td>
+            </tr>
+            <tr>
+                <td>𑴵</td>
+                <td>oo</td>
+                <td>k + oo = 𑴌𑴵</td>
+            </tr>
+            <tr>
+                <td>𑴶</td>
+                <td>Ri</td>
+                <td>k + Ri = 𑴌𑴶</td>
+            </tr>
+            <tr>
+                <td>𑴺</td>
+                <td>e</td>
+                <td>k + e = 𑴌𑴺</td>
+            </tr>
+            <tr>
+                <td>𑴼</td>
+                <td>ai</td>
+                <td>k + ai = 𑴌𑴼</td>
+            </tr>
+            <tr>
+                <td>𑴽</td>
+                <td>o</td>
+                <td>k + o = 𑴌𑴽</td>
+            </tr>
+            <tr>
+                <td>𑴿</td>
+                <td>au</td>
+                <td>k + au = 𑴌𑴿</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Consonants -->
+    <div class="section">
+        <h2>𑴌 Consonants (व्यंजन)</h2>
+
+        <h3>𑴌-Group (Velar)</h3>
+        <table>
+            <tr>
+                <th>Gondi</th>
+                <th>Type</th>
+                <th>Sound</th>
+            </tr>
+            <tr>
+                <td>𑴌</td>
+                <td>k</td>
+                <td>Ka</td>
+            </tr>
+            <tr>
+                <td>𑴍</td>
+                <td>kh / K</td>
+                <td>Kha</td>
+            </tr>
+            <tr>
+                <td>𑴎</td>
+                <td>g</td>
+                <td>Ga</td>
+            </tr>
+            <tr>
+                <td>𑴏</td>
+                <td>gh / G</td>
+                <td>Gha</td>
+            </tr>
+            <tr>
+                <td>𑴐</td>
+                <td>ng / ~N</td>
+                <td>Nga</td>
+            </tr>
+        </table>
+
+        <h3>𑴑-Group (Palatal)</h3>
+        <table>
+            <tr>
+                <th>Gondi</th>
+                <th>Type</th>
+                <th>Sound</th>
+            </tr>
+            <tr>
+                <td>𑴑</td>
+                <td>ch / c</td>
+                <td>Cha</td>
+            </tr>
+            <tr>
+                <td>𑴒</td>
+                <td>chh / Ch / C</td>
+                <td>Chha</td>
+            </tr>
+            <tr>
+                <td>𑴓</td>
+                <td>j</td>
+                <td>Ja</td>
+            </tr>
+            <tr>
+                <td>𑴔</td>
+                <td>jh / J</td>
+                <td>Jha</td>
+            </tr>
+            <tr>
+                <td>𑴕</td>
+                <td>ny / ~n</td>
+                <td>Nya</td>
+            </tr>
+        </table>
+
+        <h3>𑴖-Group (Retroflex)</h3>
+        <table>
+            <tr>
+                <th>Gondi</th>
+                <th>Type</th>
+                <th>Sound</th>
+            </tr>
+            <tr>
+                <td>𑴖</td>
+                <td>T</td>
+                <td>Ta (Hard)</td>
+            </tr>
+            <tr>
+                <td>𑴗</td>
+                <td>Th</td>
+                <td>Tha (Hard)</td>
+            </tr>
+            <tr>
+                <td>𑴘</td>
+                <td>D</td>
+                <td>Da (Hard)</td>
+            </tr>
+            <tr>
+                <td>𑴙</td>
+                <td>Dh</td>
+                <td>Dha (Hard)</td>
+            </tr>
+            <tr>
+                <td>𑴚</td>
+                <td>N</td>
+                <td>Na (Retroflex)</td>
+            </tr>
+        </table>
+
+        <h3>𑴛-Group (Dental)</h3>
+        <table>
+            <tr>
+                <th>Gondi</th>
+                <th>Type</th>
+                <th>Sound</th>
+            </tr>
+            <tr>
+                <td>𑴛</td>
+                <td>t</td>
+                <td>Ta (Soft)</td>
+            </tr>
+            <tr>
+                <td>𑴜</td>
+                <td>th</td>
+                <td>Tha (Soft)</td>
+            </tr>
+            <tr>
+                <td>𑴝</td>
+                <td>d</td>
+                <td>Da (Soft)</td>
+            </tr>
+            <tr>
+                <td>𑴞</td>
+                <td>dh</td>
+                <td>Dha (Soft)</td>
+            </tr>
+            <tr>
+                <td>𑴟</td>
+                <td>n</td>
+                <td>Na</td>
+            </tr>
+        </table>
+
+        <h3>𑴠-Group (Labial)</h3>
+        <table>
+            <tr>
+                <th>Gondi</th>
+                <th>Type</th>
+                <th>Sound</th>
+            </tr>
+            <tr>
+                <td>𑴠</td>
+                <td>p</td>
+                <td>Pa</td>
+            </tr>
+            <tr>
+                <td>𑴡</td>
+                <td>ph / P / f</td>
+                <td>Pha</td>
+            </tr>
+            <tr>
+                <td>𑴢</td>
+                <td>b</td>
+                <td>Ba</td>
+            </tr>
+            <tr>
+                <td>𑴣</td>
+                <td>bh / B</td>
+                <td>Bha</td>
+            </tr>
+            <tr>
+                <td>𑴤</td>
+                <td>m</td>
+                <td>Ma</td>
+            </tr>
+        </table>
+
+        <h3>Semi-vowels & Sibilants</h3>
+        <table>
+            <tr>
+                <th>Gondi</th>
+                <th>Type</th>
+                <th>Sound</th>
+            </tr>
+            <tr>
+                <td>𑴥</td>
+                <td>y</td>
+                <td>Ya</td>
+            </tr>
+            <tr>
+                <td>𑴦</td>
+                <td>r</td>
+                <td>Ra</td>
+            </tr>
+            <tr>
+                <td>𑴧</td>
+                <td>l</td>
+                <td>La</td>
+            </tr>
+            <tr>
+                <td>𑴨</td>
+                <td>v / w</td>
+                <td>Va/Wa</td>
+            </tr>
+            <tr>
+                <td>𑴩</td>
+                <td>sh</td>
+                <td>Sha (Palatal)</td>
+            </tr>
+            <tr>
+                <td>𑴪</td>
+                <td>Sh / shh / S</td>
+                <td>Sha (Retroflex)</td>
+            </tr>
+            <tr>
+                <td>𑴫</td>
+                <td>s</td>
+                <td>Sa</td>
+            </tr>
+            <tr>
+                <td>𑴬</td>
+                <td>h</td>
+                <td>Ha</td>
+            </tr>
+            <tr>
+                <td>𑴭</td>
+                <td>L</td>
+                <td>La (Retroflex)</td>
+            </tr>
+        </table>
+
+        <h3>Additional Consonants</h3>
+        <table>
+            <tr>
+                <th>Gondi</th>
+                <th>Type</th>
+                <th>Sound</th>
+            </tr>
+            <tr>
+                <td>𑴮</td>
+                <td>x</td>
+                <td>Extra 1</td>
+            </tr>
+            <tr>
+                <td>𑴯</td>
+                <td>X / GY</td>
+                <td>Ksha/Gya</td>
+            </tr>
+            <tr>
+                <td>𑴰</td>
+                <td>Z</td>
+                <td>Extra 3</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Special Signs -->
+    <div class="section">
+        <h2>𑵀 Special Signs</h2>
+        <table>
+            <tr>
+                <th>Sign</th>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Usage</th>
+            </tr>
+            <tr>
+                <td>𑵀</td>
+                <td>M / .n</td>
+                <td>Anusvara</td>
+                <td>Nasal sound</td>
+            </tr>
+            <tr>
+                <td>𑵁</td>
+                <td>.h</td>
+                <td>Visarga</td>
+                <td>Aspiration</td>
+            </tr>
+            <tr>
+                <td>𑵃</td>
+                <td>.N / MM</td>
+                <td>Chandrabindu</td>
+                <td>Nasalization</td>
+            </tr>
+            <tr>
+                <td>𑵄</td>
+                <td>(auto)</td>
+                <td>Halanta</td>
+                <td>Final consonant (no vowel)</td>
+            </tr>
+            <tr>
+                <td>𑵅</td>
+                <td>(auto)</td>
+                <td>Virama</td>
+                <td>Conjunct formation</td>
+            </tr>
+            <tr>
+                <td>𑵆</td>
+                <td>(auto)</td>
+                <td>Repha</td>
+                <td>R before consonant</td>
+            </tr>
+            <tr>
+                <td>𑵇</td>
+                <td>(auto)</td>
+                <td>Rakar</td>
+                <td>R after consonant</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Conjuncts -->
+    <div class="section">
+        <h2>𑴌𑵅𑴦 Conjuncts (Compound Letters)</h2>
+        <div class="note">⚠️ Type consonants together without 'a' between them to form conjuncts using Virama (𑵅).
+        </div>
+
+        <table>
+            <tr>
+                <th>Conjunct</th>
+                <th>Type</th>
+                <th>Components</th>
+            </tr>
+            <tr>
+                <td>𑴌𑵅𑴦</td>
+                <td>kr</td>
+                <td>k + virama + r</td>
+            </tr>
+            <tr>
+                <td>𑴠𑵅𑴦</td>
+                <td>pr</td>
+                <td>p + virama + r</td>
+            </tr>
+            <tr>
+                <td>𑴫𑵅𑴛</td>
+                <td>st</td>
+                <td>s + virama + t</td>
+            </tr>
+            <tr>
+                <td>𑴟𑵅𑴝</td>
+                <td>nd</td>
+                <td>n + virama + d</td>
+            </tr>
+            <tr>
+                <td>𑴩𑵅𑴦</td>
+                <td>shr</td>
+                <td>sh + virama + r</td>
+            </tr>
+            <tr>
+                <td>𑴌𑵅𑴩</td>
+                <td>ksh</td>
+                <td>k + virama + sh</td>
+            </tr>
+        </table>
+
+        <div class="tip">💡 Rakar (𑵇): When 'r' comes after a consonant, type normally: <b>kra</b>, <b>pra</b>,
+            <b>tra</b>
+        </div>
+        <div class="tip">💡 Repha (𑵆): When 'r' comes before a consonant after a vowel, it auto-converts: <b>arka</b>
+        </div>
+    </div>
+
+    <!-- Barakhadi -->
+    <div class="section">
+        <h2>𑴌 Barakhadi — Example: 𑴌 (ka)</h2>
+        <div class="grid">
+            <div class="grid-item">
+                <div class="char">𑴌</div>
+                <div class="label">ka</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">𑴌𑴱</div>
+                <div class="label">kaa</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">𑴌𑴲</div>
+                <div class="label">ki</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">𑴌𑴳</div>
+                <div class="label">kee</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">𑴌𑴴</div>
+                <div class="label">ku</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">𑴌𑴵</div>
+                <div class="label">koo</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">𑴌𑴶</div>
+                <div class="label">kRi</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">𑴌𑴺</div>
+                <div class="label">ke</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">𑴌𑴼</div>
+                <div class="label">kai</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">𑴌𑴽</div>
+                <div class="label">ko</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">𑴌𑴿</div>
+                <div class="label">kau</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">𑴌𑵀</div>
+                <div class="label">kaM</div>
+            </div>
+        </div>
+        <div class="tip">💡 Long-press any key to see all barakhadi variants!</div>
+    </div>
+
+    <!-- Numbers -->
+    <div class="section">
+        <h2>𑵐 Numbers (अंक)</h2>
+        <table>
+            <tr>
+                <th>Gondi</th>
+                <th>Type</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>𑵐</td>
+                <td>0</td>
+                <td>Zero</td>
+            </tr>
+            <tr>
+                <td>𑵑</td>
+                <td>1</td>
+                <td>One</td>
+            </tr>
+            <tr>
+                <td>𑵒</td>
+                <td>2</td>
+                <td>Two</td>
+            </tr>
+            <tr>
+                <td>𑵓</td>
+                <td>3</td>
+                <td>Three</td>
+            </tr>
+            <tr>
+                <td>𑵔</td>
+                <td>4</td>
+                <td>Four</td>
+            </tr>
+            <tr>
+                <td>𑵕</td>
+                <td>5</td>
+                <td>Five</td>
+            </tr>
+            <tr>
+                <td>𑵖</td>
+                <td>6</td>
+                <td>Six</td>
+            </tr>
+            <tr>
+                <td>𑵗</td>
+                <td>7</td>
+                <td>Seven</td>
+            </tr>
+            <tr>
+                <td>𑵘</td>
+                <td>8</td>
+                <td>Eight</td>
+            </tr>
+            <tr>
+                <td>𑵙</td>
+                <td>9</td>
+                <td>Nine</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Punctuation -->
+    <div class="section">
+        <h2>Punctuation</h2>
+        <table>
+            <tr>
+                <th>Symbol</th>
+                <th>Type</th>
+                <th>Name</th>
+            </tr>
+            <tr>
+                <td>।</td>
+                <td>. (single dot)</td>
+                <td>Danda</td>
+            </tr>
+            <tr>
+                <td>॥</td>
+                <td>... (three dots)</td>
+                <td>Double Danda</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Practice -->
+    <div class="section">
+        <h2>📝 Practice Words</h2>
+        <div class="example"><span>gonDee</span> → 𑴎𑴽𑵀𑴘𑴲 (Gondi)</div>
+        <div class="example"><span>masaram</span> → 𑴤𑴫𑴦𑴱𑴤 (Masaram)</div>
+        <div class="example"><span>namaste</span> → 𑴟𑴤𑴫𑴛𑴺 (Namaste)</div>
+        <div class="example"><span>paanee</span> → 𑴠𑴱𑴟𑴳 (Water)</div>
+        <div class="example"><span>ghar</span> → 𑴏𑴦 (Home)</div>
+    </div>
+
+    <!-- Tips -->
+    <div class="section">
+        <h2>💡 Quick Tips</h2>
+        <div class="tip">🔤 <b>Case matters:</b> t = 𑴛 (dental), T = 𑴖 (retroflex)</div>
+        <div class="tip">🔤 <b>Case matters:</b> d = 𑴝 (dental), D = 𑴘 (retroflex)</div>
+        <div class="tip">🔤 <b>Case matters:</b> n = 𑴟 (dental), N = 𑴚 (retroflex)</div>
+        <div class="tip">🔗 <b>Conjuncts:</b> Type without 'a': kr = 𑴌𑵅𑴦</div>
+        <div class="tip">👆 <b>Long press:</b> Hold any key to see barakhadi</div>
+        <div class="tip">🔢 <b>Numbers:</b> Enable number row in settings for Gondi digits</div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <h3>🌿 GondiDarshan.org</h3>
+        <p>Preserving and promoting Gond tribal heritage through technology.</p>
+        <a href="https://gondidarshan.org">Visit GondiDarshan.org →</a>
+    </div>
+
+    <div class="support">
+        <h3>☕ Support This Project</h3>
+        <p>Help us preserve indigenous languages through digital tools!</p>
+        <a href="https://buymeacoffee.com/hinditutorpoint">☕ Buy Me a Coffee →</a>
+    </div>
+
+</body>
+
+</html>

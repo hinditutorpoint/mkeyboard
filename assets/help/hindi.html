@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hindi Typing Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            padding: 12px;
+            line-height: 1.6
+        }
+
+        .header {
+            background: linear-gradient(135deg, #FF6B00, #FF9800);
+            color: #fff;
+            padding: 20px 16px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            text-align: center
+        }
+
+        .header h1 {
+            font-size: 22px;
+            margin-bottom: 4px
+        }
+
+        .header p {
+            font-size: 13px;
+            opacity: 0.9
+        }
+
+        .section {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1)
+        }
+
+        .section h2 {
+            font-size: 16px;
+            color: #FF6B00;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #FFF3E0
+        }
+
+        .section h3 {
+            font-size: 14px;
+            color: #555;
+            margin: 10px 0 6px
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0
+        }
+
+        th {
+            background: #FFF3E0;
+            color: #E65100;
+            padding: 8px 6px;
+            text-align: left;
+            font-size: 12px;
+            border-bottom: 2px solid #FFE0B2
+        }
+
+        td {
+            padding: 7px 6px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px
+        }
+
+        td:first-child {
+            font-weight: 600;
+            color: #FF6B00;
+            font-size: 15px
+        }
+
+        td:nth-child(2) {
+            font-family: monospace;
+            background: #f8f8f8;
+            border-radius: 4px;
+            padding: 4px 8px;
+            color: #333
+        }
+
+        .note {
+            background: #FFF8E1;
+            border-left: 3px solid #FFB300;
+            padding: 10px 12px;
+            border-radius: 0 8px 8px 0;
+            margin: 8px 0;
+            font-size: 12px
+        }
+
+        .tip {
+            background: #E8F5E9;
+            border-left: 3px solid #4CAF50;
+            padding: 10px 12px;
+            border-radius: 0 8px 8px 0;
+            margin: 8px 0;
+            font-size: 12px
+        }
+
+        .example {
+            background: #E3F2FD;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin: 6px 0;
+            font-size: 13px
+        }
+
+        .example span {
+            font-weight: 600;
+            color: #1565C0
+        }
+
+        .badge {
+            display: inline-block;
+            background: #FF6B00;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            margin-left: 4px
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #2E7D32, #43A047);
+            color: #fff;
+            padding: 20px 16px;
+            border-radius: 16px;
+            margin-top: 16px;
+            text-align: center
+        }
+
+        .footer h3 {
+            font-size: 16px;
+            margin-bottom: 6px
+        }
+
+        .footer p {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px
+        }
+
+        .footer a {
+            color: #A5D6A7;
+            text-decoration: none;
+            font-weight: 600
+        }
+
+        .support {
+            background: linear-gradient(135deg, #FF6B00, #FF9800);
+            color: #fff;
+            padding: 16px;
+            border-radius: 16px;
+            margin-top: 12px;
+            text-align: center
+        }
+
+        .support h3 {
+            font-size: 15px;
+            margin-bottom: 6px
+        }
+
+        .support a {
+            color: #FFF9C4;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 6px;
+            margin: 8px 0
+        }
+
+        .grid-item {
+            background: #FFF3E0;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center
+        }
+
+        .grid-item .char {
+            font-size: 20px;
+            color: #E65100
+        }
+
+        .grid-item .label {
+            font-size: 10px;
+            color: #888;
+            margin-top: 2px
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>🇮🇳 हिंदी टाइपिंग गाइड</h1>
+        <p>Hindi Transliteration Keyboard Guide</p>
+    </div>
+
+    <!-- Vowels -->
+    <div class="section">
+        <h2>स्वर (Vowels)</h2>
+        <h3>Independent Vowels</h3>
+        <table>
+            <tr>
+                <th>Hindi</th>
+                <th>Type</th>
+                <th>Name</th>
+            </tr>
+            <tr>
+                <td>अ</td>
+                <td>a</td>
+                <td>A (Short)</td>
+            </tr>
+            <tr>
+                <td>आ</td>
+                <td>aa / A</td>
+                <td>Aa (Long)</td>
+            </tr>
+            <tr>
+                <td>इ</td>
+                <td>i</td>
+                <td>I (Short)</td>
+            </tr>
+            <tr>
+                <td>ई</td>
+                <td>ee / I</td>
+                <td>Ii (Long)</td>
+            </tr>
+            <tr>
+                <td>उ</td>
+                <td>u</td>
+                <td>U (Short)</td>
+            </tr>
+            <tr>
+                <td>ऊ</td>
+                <td>oo / U</td>
+                <td>Uu (Long)</td>
+            </tr>
+            <tr>
+                <td>ऋ</td>
+                <td>Ri / .r</td>
+                <td>Ri (Vocalic R)</td>
+            </tr>
+            <tr>
+                <td>ए</td>
+                <td>e</td>
+                <td>E (Short)</td>
+            </tr>
+            <tr>
+                <td>ऐ</td>
+                <td>ai / E</td>
+                <td>Ai (Diphthong)</td>
+            </tr>
+            <tr>
+                <td>ओ</td>
+                <td>o</td>
+                <td>O (Short)</td>
+            </tr>
+            <tr>
+                <td>औ</td>
+                <td>au / O</td>
+                <td>Au (Diphthong)</td>
+            </tr>
+        </table>
+
+        <h3>Vowel Signs (Matras) — after consonant</h3>
+        <table>
+            <tr>
+                <th>Matra</th>
+                <th>Type</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td>ा</td>
+                <td>aa</td>
+                <td>k + aa = का</td>
+            </tr>
+            <tr>
+                <td>ि</td>
+                <td>i</td>
+                <td>k + i = कि</td>
+            </tr>
+            <tr>
+                <td>ी</td>
+                <td>ee</td>
+                <td>k + ee = की</td>
+            </tr>
+            <tr>
+                <td>ु</td>
+                <td>u</td>
+                <td>k + u = कु</td>
+            </tr>
+            <tr>
+                <td>ू</td>
+                <td>oo</td>
+                <td>k + oo = कू</td>
+            </tr>
+            <tr>
+                <td>ृ</td>
+                <td>Ri</td>
+                <td>k + Ri = कृ</td>
+            </tr>
+            <tr>
+                <td>े</td>
+                <td>e</td>
+                <td>k + e = के</td>
+            </tr>
+            <tr>
+                <td>ै</td>
+                <td>ai</td>
+                <td>k + ai = कै</td>
+            </tr>
+            <tr>
+                <td>ो</td>
+                <td>o</td>
+                <td>k + o = को</td>
+            </tr>
+            <tr>
+                <td>ौ</td>
+                <td>au</td>
+                <td>k + au = कौ</td>
+            </tr>
+        </table>
+
+        <div class="tip">💡 Inherent vowel: Every consonant has built-in 'a'. Type <b>k</b> = <b>क</b> (ka). Type
+            <b>ka</b> = <b>क</b> (same).
+        </div>
+    </div>
+
+    <!-- Consonants -->
+    <div class="section">
+        <h2>व्यंजन (Consonants)</h2>
+
+        <h3>क-वर्ग (Ka Group) — Velar</h3>
+        <table>
+            <tr>
+                <th>Hindi</th>
+                <th>Type</th>
+                <th>Name</th>
+            </tr>
+            <tr>
+                <td>क</td>
+                <td>k</td>
+                <td>Ka</td>
+            </tr>
+            <tr>
+                <td>ख</td>
+                <td>kh / K</td>
+                <td>Kha</td>
+            </tr>
+            <tr>
+                <td>ग</td>
+                <td>g</td>
+                <td>Ga</td>
+            </tr>
+            <tr>
+                <td>घ</td>
+                <td>gh / G</td>
+                <td>Gha</td>
+            </tr>
+            <tr>
+                <td>ङ</td>
+                <td>ng / ~N</td>
+                <td>Nga</td>
+            </tr>
+        </table>
+
+        <h3>च-वर्ग (Cha Group) — Palatal</h3>
+        <table>
+            <tr>
+                <th>Hindi</th>
+                <th>Type</th>
+                <th>Name</th>
+            </tr>
+            <tr>
+                <td>च</td>
+                <td>ch / c</td>
+                <td>Cha</td>
+            </tr>
+            <tr>
+                <td>छ</td>
+                <td>chh / Ch / C</td>
+                <td>Chha</td>
+            </tr>
+            <tr>
+                <td>ज</td>
+                <td>j</td>
+                <td>Ja</td>
+            </tr>
+            <tr>
+                <td>झ</td>
+                <td>jh / J</td>
+                <td>Jha</td>
+            </tr>
+            <tr>
+                <td>ञ</td>
+                <td>ny / ~n</td>
+                <td>Nya</td>
+            </tr>
+        </table>
+
+        <h3>ट-वर्ग (Ta Group) — Retroflex</h3>
+        <table>
+            <tr>
+                <th>Hindi</th>
+                <th>Type</th>
+                <th>Name</th>
+            </tr>
+            <tr>
+                <td>ट</td>
+                <td>T</td>
+                <td>Ta (Hard)</td>
+            </tr>
+            <tr>
+                <td>ठ</td>
+                <td>Th</td>
+                <td>Tha (Hard)</td>
+            </tr>
+            <tr>
+                <td>ड</td>
+                <td>D</td>
+                <td>Da (Hard)</td>
+            </tr>
+            <tr>
+                <td>ढ</td>
+                <td>Dh</td>
+                <td>Dha (Hard)</td>
+            </tr>
+            <tr>
+                <td>ण</td>
+                <td>N</td>
+                <td>Na (Retroflex)</td>
+            </tr>
+        </table>
+
+        <h3>त-वर्ग (Ta Group) — Dental</h3>
+        <table>
+            <tr>
+                <th>Hindi</th>
+                <th>Type</th>
+                <th>Name</th>
+            </tr>
+            <tr>
+                <td>त</td>
+                <td>t</td>
+                <td>Ta (Soft)</td>
+            </tr>
+            <tr>
+                <td>थ</td>
+                <td>th</td>
+                <td>Tha (Soft)</td>
+            </tr>
+            <tr>
+                <td>द</td>
+                <td>d</td>
+                <td>Da (Soft)</td>
+            </tr>
+            <tr>
+                <td>ध</td>
+                <td>dh</td>
+                <td>Dha (Soft)</td>
+            </tr>
+            <tr>
+                <td>न</td>
+                <td>n</td>
+                <td>Na</td>
+            </tr>
+        </table>
+
+        <h3>प-वर्ग (Pa Group) — Labial</h3>
+        <table>
+            <tr>
+                <th>Hindi</th>
+                <th>Type</th>
+                <th>Name</th>
+            </tr>
+            <tr>
+                <td>प</td>
+                <td>p</td>
+                <td>Pa</td>
+            </tr>
+            <tr>
+                <td>फ</td>
+                <td>ph / P</td>
+                <td>Pha</td>
+            </tr>
+            <tr>
+                <td>ब</td>
+                <td>b</td>
+                <td>Ba</td>
+            </tr>
+            <tr>
+                <td>भ</td>
+                <td>bh / B</td>
+                <td>Bha</td>
+            </tr>
+            <tr>
+                <td>म</td>
+                <td>m</td>
+                <td>Ma</td>
+            </tr>
+        </table>
+
+        <h3>अंतस्थ (Semi-vowels) & ऊष्म (Sibilants)</h3>
+        <table>
+            <tr>
+                <th>Hindi</th>
+                <th>Type</th>
+                <th>Name</th>
+            </tr>
+            <tr>
+                <td>य</td>
+                <td>y</td>
+                <td>Ya</td>
+            </tr>
+            <tr>
+                <td>र</td>
+                <td>r</td>
+                <td>Ra</td>
+            </tr>
+            <tr>
+                <td>ल</td>
+                <td>l</td>
+                <td>La</td>
+            </tr>
+            <tr>
+                <td>व</td>
+                <td>v / w</td>
+                <td>Va</td>
+            </tr>
+            <tr>
+                <td>श</td>
+                <td>sh</td>
+                <td>Sha (Palatal)</td>
+            </tr>
+            <tr>
+                <td>ष</td>
+                <td>Sh / shh</td>
+                <td>Sha (Retroflex)</td>
+            </tr>
+            <tr>
+                <td>स</td>
+                <td>s</td>
+                <td>Sa</td>
+            </tr>
+            <tr>
+                <td>ह</td>
+                <td>h</td>
+                <td>Ha</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Nukta Consonants -->
+    <div class="section">
+        <h2>नुक्ता व्यंजन (Nukta Consonants)</h2>
+        <table>
+            <tr>
+                <th>Hindi</th>
+                <th>Type</th>
+                <th>Used In</th>
+            </tr>
+            <tr>
+                <td>क़</td>
+                <td>q</td>
+                <td>Urdu/Arabic words</td>
+            </tr>
+            <tr>
+                <td>ख़</td>
+                <td>KH</td>
+                <td>Urdu/Arabic words</td>
+            </tr>
+            <tr>
+                <td>ग़</td>
+                <td>Gh</td>
+                <td>Urdu/Arabic words</td>
+            </tr>
+            <tr>
+                <td>ज़</td>
+                <td>z</td>
+                <td>Urdu/Arabic words</td>
+            </tr>
+            <tr>
+                <td>ड़</td>
+                <td>.D</td>
+                <td>Hindi words</td>
+            </tr>
+            <tr>
+                <td>ढ़</td>
+                <td>.Dh</td>
+                <td>Hindi words</td>
+            </tr>
+            <tr>
+                <td>फ़</td>
+                <td>f</td>
+                <td>English/Urdu words</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Special Signs -->
+    <div class="section">
+        <h2>विशेष चिह्न (Special Signs)</h2>
+        <table>
+            <tr>
+                <th>Sign</th>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Usage</th>
+            </tr>
+            <tr>
+                <td>ं</td>
+                <td>M / .n</td>
+                <td>Anusvara</td>
+                <td>Nasal: हं (haM)</td>
+            </tr>
+            <tr>
+                <td>ँ</td>
+                <td>.N / MM</td>
+                <td>Chandrabindu</td>
+                <td>Nasal: हँ</td>
+            </tr>
+            <tr>
+                <td>ः</td>
+                <td>H / .h</td>
+                <td>Visarga</td>
+                <td>Aspiration: दुःख</td>
+            </tr>
+            <tr>
+                <td>्</td>
+                <td>(auto)</td>
+                <td>Halant</td>
+                <td>Removes inherent vowel</td>
+            </tr>
+            <tr>
+                <td>ॐ</td>
+                <td>OM</td>
+                <td>Om</td>
+                <td>Sacred syllable</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Conjuncts -->
+    <div class="section">
+        <h2>संयुक्त अक्षर (Conjunct Consonants)</h2>
+        <div class="note">⚠️ Type consonants together WITHOUT vowels between them to form conjuncts.</div>
+
+        <table>
+            <tr>
+                <th>Conjunct</th>
+                <th>Type</th>
+                <th>Word Example</th>
+            </tr>
+            <tr>
+                <td>क्ष</td>
+                <td>ksh</td>
+                <td>रक्षा (rakshaa)</td>
+            </tr>
+            <tr>
+                <td>त्र</td>
+                <td>tr</td>
+                <td>मित्र (mitr)</td>
+            </tr>
+            <tr>
+                <td>ज्ञ</td>
+                <td>GY / jny</td>
+                <td>ज्ञान (GYaan)</td>
+            </tr>
+            <tr>
+                <td>श्र</td>
+                <td>shr</td>
+                <td>श्रम (shram)</td>
+            </tr>
+            <tr>
+                <td>क्र</td>
+                <td>kr</td>
+                <td>क्रम (kram)</td>
+            </tr>
+            <tr>
+                <td>प्र</td>
+                <td>pr</td>
+                <td>प्रेम (prem)</td>
+            </tr>
+            <tr>
+                <td>स्त</td>
+                <td>st</td>
+                <td>मस्त (mast)</td>
+            </tr>
+            <tr>
+                <td>न्द</td>
+                <td>nd</td>
+                <td>चन्द (chand)</td>
+            </tr>
+            <tr>
+                <td>ष्ट</td>
+                <td>ShT</td>
+                <td>कष्ट (kaShT)</td>
+            </tr>
+            <tr>
+                <td>द्ध</td>
+                <td>ddh</td>
+                <td>बुद्ध (buddh)</td>
+            </tr>
+            <tr>
+                <td>त्त</td>
+                <td>tt</td>
+                <td>उत्तर (uttar)</td>
+            </tr>
+            <tr>
+                <td>क्त</td>
+                <td>kt</td>
+                <td>भक्त (bhakt)</td>
+            </tr>
+        </table>
+
+        <div class="tip">💡 Just type continuously: <b>vidyaalaya</b> = <b>विद्यालय</b></div>
+    </div>
+
+    <!-- Barakhadi -->
+    <div class="section">
+        <h2>बारहखड़ी (Barakhadi) — Example: क</h2>
+        <div class="grid">
+            <div class="grid-item">
+                <div class="char">क</div>
+                <div class="label">ka</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">का</div>
+                <div class="label">kaa</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">कि</div>
+                <div class="label">ki</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">की</div>
+                <div class="label">kee</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">कु</div>
+                <div class="label">ku</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">कू</div>
+                <div class="label">koo</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">कृ</div>
+                <div class="label">kRi</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">के</div>
+                <div class="label">ke</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">कै</div>
+                <div class="label">kai</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">को</div>
+                <div class="label">ko</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">कौ</div>
+                <div class="label">kau</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">कं</div>
+                <div class="label">kaM</div>
+            </div>
+        </div>
+        <div class="tip">💡 Long-press any key to see all barakhadi variants!</div>
+    </div>
+
+    <!-- Numbers -->
+    <div class="section">
+        <h2>अंक (Numbers)</h2>
+        <table>
+            <tr>
+                <th>Hindi</th>
+                <th>Type</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>०</td>
+                <td>0</td>
+                <td>Zero</td>
+            </tr>
+            <tr>
+                <td>१</td>
+                <td>1</td>
+                <td>One</td>
+            </tr>
+            <tr>
+                <td>२</td>
+                <td>2</td>
+                <td>Two</td>
+            </tr>
+            <tr>
+                <td>३</td>
+                <td>3</td>
+                <td>Three</td>
+            </tr>
+            <tr>
+                <td>४</td>
+                <td>4</td>
+                <td>Four</td>
+            </tr>
+            <tr>
+                <td>५</td>
+                <td>5</td>
+                <td>Five</td>
+            </tr>
+            <tr>
+                <td>६</td>
+                <td>6</td>
+                <td>Six</td>
+            </tr>
+            <tr>
+                <td>७</td>
+                <td>7</td>
+                <td>Seven</td>
+            </tr>
+            <tr>
+                <td>८</td>
+                <td>8</td>
+                <td>Eight</td>
+            </tr>
+            <tr>
+                <td>९</td>
+                <td>9</td>
+                <td>Nine</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Punctuation -->
+    <div class="section">
+        <h2>विराम चिह्न (Punctuation)</h2>
+        <table>
+            <tr>
+                <th>Symbol</th>
+                <th>Type</th>
+                <th>Name</th>
+            </tr>
+            <tr>
+                <td>।</td>
+                <td>. (single dot)</td>
+                <td>Purna Viram (Full Stop)</td>
+            </tr>
+            <tr>
+                <td>॥</td>
+                <td>... (three dots)</td>
+                <td>Deergh Viram (Double)</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Common Words -->
+    <div class="section">
+        <h2>अभ्यास (Practice Words)</h2>
+        <div class="example"><span>namaste</span> → नमस्ते</div>
+        <div class="example"><span>bhaaratа</span> → भारत</div>
+        <div class="example"><span>hindee</span> → हिन्दी</div>
+        <div class="example"><span>vidyaalaya</span> → विद्यालय</div>
+        <div class="example"><span>shikshak</span> → शिक्षक</div>
+        <div class="example"><span>parivaar</span> → परिवार</div>
+        <div class="example"><span>dhanyavaad</span> → धन्यवाद</div>
+        <div class="example"><span>svaagat</span> → स्वागत</div>
+        <div class="example"><span>vishvavidyaalaya</span> → विश्वविद्यालय</div>
+        <div class="example"><span>pradhaanamantree</span> → प्रधानमंत्री</div>
+    </div>
+
+    <!-- Tips -->
+    <div class="section">
+        <h2>💡 Quick Tips</h2>
+        <div class="tip">🔤 <b>Case matters:</b> t = त (soft), T = ट (hard), n = न, N = ण</div>
+        <div class="tip">🔗 <b>Conjuncts:</b> Just type without 'a' between: kr = क्र, pr = प्र</div>
+        <div class="tip">👆 <b>Long press:</b> Hold any key to see barakhadi variants</div>
+        <div class="tip">🔄 <b>Switch:</b> Tap language button to cycle between languages</div>
+        <div class="tip">🎤 <b>Voice:</b> Tap microphone for voice input in Hindi</div>
+        <div class="tip">👉 <b>Glide:</b> Slide finger across keys for swipe typing</div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <h3>🌿 GondiDarshan.org</h3>
+        <p>Preserving and promoting Gond tribal heritage through technology.</p>
+        <a href="https://gondidarshan.org">Visit GondiDarshan.org →</a>
+    </div>
+
+    <div class="support">
+        <h3>☕ Support This Project</h3>
+        <p>Help us build more tools for indigenous languages!</p>
+        <a href="https://buymeacoffee.com/hinditutorpoint">☕ Buy Me a Coffee →</a>
+    </div>
+
+</body>
+
+</html>

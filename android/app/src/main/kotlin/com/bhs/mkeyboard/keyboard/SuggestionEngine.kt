@@ -36,6 +36,8 @@ class SuggestionEngine private constructor(private val context: Context) {
         val inputKey: String,
         val hindiOutput: String,
         val gondiOutput: String,
+        val gunjalaOutput: String = "",
+        val olChikiOutput: String = "",
         val englishOutput: String,
         val alternatives: List<String>,
         val usageCount: Int = 0,
@@ -71,6 +73,8 @@ class SuggestionEngine private constructor(private val context: Context) {
             0 -> getEnglishSuggestions(lastInputWord, limit)
             1 -> getHindiSuggestions(lastInputWord, lastTranslitWord, limit)
             2 -> getGondiSuggestions(lastInputWord, lastTranslitWord, limit)
+            3 -> getGunjalaSuggestions(lastInputWord, lastTranslitWord, limit)
+            4 -> getOlChikiSuggestions(lastInputWord, lastTranslitWord, limit)
             else -> emptyList()
         }
     }
@@ -266,6 +270,38 @@ class SuggestionEngine private constructor(private val context: Context) {
             .take(limit)
     }
 
+    private fun getGunjalaSuggestions(input: String, translit: String, limit: Int): List<String> {
+        if (input.isEmpty() && translit.isEmpty()) return emptyList()
+
+        return cachedWords
+            .filter {
+                it.gunjalaOutput.isNotEmpty() && (
+                    (translit.isNotEmpty() && it.gunjalaOutput.startsWith(translit)) ||
+                    (input.isNotEmpty() && it.inputKey.lowercase().startsWith(input))
+                )
+            }
+            .sortedByDescending { it.usageCount }
+            .map { it.gunjalaOutput }
+            .distinct()
+            .take(limit)
+    }
+
+    private fun getOlChikiSuggestions(input: String, translit: String, limit: Int): List<String> {
+        if (input.isEmpty() && translit.isEmpty()) return emptyList()
+
+        return cachedWords
+            .filter {
+                it.olChikiOutput.isNotEmpty() && (
+                    (translit.isNotEmpty() && it.olChikiOutput.startsWith(translit)) ||
+                    (input.isNotEmpty() && it.inputKey.lowercase().startsWith(input))
+                )
+            }
+            .sortedByDescending { it.usageCount }
+            .map { it.olChikiOutput }
+            .distinct()
+            .take(limit)
+    }
+
     private fun loadCustomWords(): List<SuggestionWord> {
         try {
             val jsonString = prefs.getString("flutter.customWords", "[]") ?: "[]"
@@ -284,6 +320,8 @@ class SuggestionEngine private constructor(private val context: Context) {
                             inputKey = english,
                             hindiOutput = if (language == 1) translated else "",
                             gondiOutput = if (language == 2) translated else "",
+                            gunjalaOutput = if (language == 3) translated else "",
+                            olChikiOutput = if (language == 4) translated else "",
                             englishOutput = english,
                             alternatives = emptyList(),
                             usageCount = obj.optInt("usageCount", 0),
@@ -328,6 +366,8 @@ class SuggestionEngine private constructor(private val context: Context) {
                             inputKey = kbdKey,
                             hindiOutput = hindi,
                             gondiOutput = gondiWord.ifEmpty { gondi },
+                            gunjalaOutput = "", // Assets don't currently have Gunjala
+                            olChikiOutput = "", // Assets don't currently have Ol Chiki
                             englishOutput = english.ifEmpty { kbdKey },
                             alternatives = alts,
                             usageCount = 0,
@@ -350,7 +390,9 @@ class SuggestionEngine private constructor(private val context: Context) {
         val existingIndex = cachedWords.indexOfFirst {
             it.inputKey.equals(input, ignoreCase = true) &&
             ((languageIndex == 1 && it.hindiOutput == output) ||
-             (languageIndex == 2 && it.gondiOutput == output))
+             (languageIndex == 2 && it.gondiOutput == output) ||
+             (languageIndex == 3 && it.gunjalaOutput == output) ||
+             (languageIndex == 4 && it.olChikiOutput == output))
         }
 
         if (existingIndex != -1) {
@@ -374,6 +416,8 @@ class SuggestionEngine private constructor(private val context: Context) {
                 inputKey = input,
                 hindiOutput = if (languageIndex == 1) output else "",
                 gondiOutput = if (languageIndex == 2) output else "",
+                gunjalaOutput = if (languageIndex == 3) output else "",
+                olChikiOutput = if (languageIndex == 4) output else "",
                 englishOutput = input,
                 alternatives = emptyList(),
                 usageCount = 1,
@@ -391,7 +435,14 @@ class SuggestionEngine private constructor(private val context: Context) {
 
             val newObj = org.json.JSONObject()
             newObj.put("english", word.inputKey)
-            newObj.put("translated", if (languageIndex == 1) word.hindiOutput else word.gondiOutput)
+            val translated = when (languageIndex) {
+                1 -> word.hindiOutput
+                2 -> word.gondiOutput
+                3 -> word.gunjalaOutput
+                4 -> word.olChikiOutput
+                else -> ""
+            }
+            newObj.put("translated", translated)
             newObj.put("language", languageIndex)
             newObj.put("usageCount", 1)
             newObj.put("isPinned", false)

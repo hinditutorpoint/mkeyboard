@@ -27,7 +27,11 @@ class _TextEditorScreenState extends State<TextEditorScreen> {
 
   bool _containsHindi = false;
   bool _containsGondi = false;
+  bool _containsGunjalaGondi = false;
+  bool _containsOlChiki = false;
   bool _gondiSupported = false;
+  bool _gunjalaGondiSupported = false;
+  bool _olChikiSupported = false;
 
   @override
   void initState() {
@@ -38,8 +42,12 @@ class _TextEditorScreenState extends State<TextEditorScreen> {
 
   Future<void> _checkFontSupport() async {
     final supported = await FontSupportChecker.supportsMasaramGondi();
+    final gunjalaSupported = await FontSupportChecker.supportsGunjalaGondi();
+    final olChikiSupported = await FontSupportChecker.supportsOlChiki();
     setState(() {
       _gondiSupported = supported;
+      _gunjalaGondiSupported = gunjalaSupported;
+      _olChikiSupported = olChikiSupported;
     });
   }
 
@@ -48,6 +56,10 @@ class _TextEditorScreenState extends State<TextEditorScreen> {
     setState(() {
       _containsHindi = FontSupportChecker.containsHindiCharacters(text);
       _containsGondi = FontSupportChecker.containsGondiCharacters(text);
+      _containsGunjalaGondi = FontSupportChecker.containsGunjalaGondiCharacters(
+        text,
+      );
+      _containsOlChiki = FontSupportChecker.containsOlChikiCharacters(text);
     });
   }
 
@@ -127,6 +139,8 @@ class _TextEditorScreenState extends State<TextEditorScreen> {
       'Roboto',
       'NotoSansDevanagari',
       'NotoSansMasaramGondi',
+      'NotoSansGunjalaGondi',
+      'NotoSansOlChiki',
       'Arial',
       'Times New Roman',
     ];
@@ -135,18 +149,20 @@ class _TextEditorScreenState extends State<TextEditorScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Select Font'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: fonts.map((font) {
-            return ListTile(
-              title: Text(font, style: TextStyle(fontFamily: font)),
-              selected: _currentFont == font,
-              onTap: () {
-                _changeFontFamily(font);
-                Navigator.pop(context);
-              },
-            );
-          }).toList(),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: fonts.map((font) {
+              return ListTile(
+                title: Text(font, style: TextStyle(fontFamily: font)),
+                selected: _currentFont == font,
+                onTap: () {
+                  _changeFontFamily(font);
+                  Navigator.pop(context);
+                },
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
@@ -217,6 +233,8 @@ class _TextEditorScreenState extends State<TextEditorScreen> {
       fileName,
       containsHindi: _containsHindi,
       containsGondi: _containsGondi,
+      containsGunjalaGondi: _containsGunjalaGondi,
+      containsOlChiki: _containsOlChiki,
     );
 
     if (file != null && mounted) {
@@ -320,7 +338,54 @@ class _TextEditorScreenState extends State<TextEditorScreen> {
                 ],
               ),
             ),
-
+          if (_containsGunjalaGondi)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(8),
+              color: _gunjalaGondiSupported ? Colors.green : Colors.orange,
+              child: Row(
+                children: [
+                  Icon(
+                    _gunjalaGondiSupported ? Icons.check_circle : Icons.warning,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _gunjalaGondiSupported
+                          ? 'Gunjala Gondi font supported - will share as text'
+                          : 'Gunjala Gondi font not supported - will share as image',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (_containsOlChiki)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(8),
+              color: _olChikiSupported ? Colors.green : Colors.orange,
+              child: Row(
+                children: [
+                  Icon(
+                    _olChikiSupported ? Icons.check_circle : Icons.warning,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _olChikiSupported
+                          ? 'Ol Chiki font supported - will share as text'
+                          : 'Ol Chiki font not supported - will share as image',
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           // Formatting toolbar
           Container(
             decoration: BoxDecoration(
@@ -457,7 +522,12 @@ class _TextEditorScreenState extends State<TextEditorScreen> {
                   data: Theme.of(context).copyWith(
                     textTheme: Theme.of(context).textTheme.apply(
                       fontFamily: 'NotoSansDevanagari',
-                      fontFamilyFallback: ['NotoSansMasaramGondi', 'Roboto'],
+                      fontFamilyFallback: [
+                        'NotoSansMasaramGondi',
+                        'NotoSansGunjalaGondi',
+                        'NotoSansOlChiki',
+                        'Roboto',
+                      ],
                     ),
                   ),
                   child: quill.QuillEditor.basic(

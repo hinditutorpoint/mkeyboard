@@ -26,6 +26,7 @@ dependencies:
   file_picker: ^10.3.8 
   flutter_riverpod: ^3.1.0
   emoji_picker_flutter: ^4.4.0
+  webview_flutter: ^4.13.1
 
 dev_dependencies:
   flutter_test:
@@ -44,6 +45,8 @@ flutter:
     - assets/suggestions/gondi_words.json
     - assets/suggestions/suggestions.json
     - assets/dictionary/
+    - assets/help/
+    - assets/fonts/
 
   fonts:
     # Hindi Font
@@ -58,6 +61,20 @@ flutter:
       fonts:
         - asset: assets/fonts/NotoSansMasaramGondi-Regular.ttf
           weight: 400
+
+    # Gunjala Gondi Font
+    - family: NotoSansGunjalaGondi
+      fonts:
+        - asset: assets/fonts/NotoSansGunjalaGondi-Regular.ttf
+        - asset: assets/fonts/NotoSansGunjalaGondi-Bold.ttf
+          weight: 700
+    
+    # Ol Chiki Font
+    - family: NotoSansOlChiki
+      fonts:
+        - asset: assets/fonts/NotoSansOlChiki-Regular.ttf
+        - asset: assets/fonts/NotoSansOlChiki-Bold.ttf
+          weight: 700
 
 flutter_launcher_icons:
   android: "launcher_icon"

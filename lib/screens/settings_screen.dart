@@ -130,6 +130,11 @@ class SettingsScreen extends ConsumerWidget {
                 DropdownMenuItem(value: 0, child: Text('English')),
                 DropdownMenuItem(value: 1, child: Text('हिंदी')),
                 DropdownMenuItem(value: 2, child: Text('𑴎𑴟')),
+                DropdownMenuItem(
+                  value: 3,
+                  child: Text('𑵠𑵡𑵢𑵣𑵤𑵥𑵦𑵧𑵨𑵩𑵪𑵫'),
+                ),
+                DropdownMenuItem(value: 4, child: Text('᱐᱑᱒᱓᱔᱕᱖᱗᱘᱙')),
               ],
               onChanged: (value) {
                 if (value != null) notifier.setDefaultLanguage(value);

@@ -5,99 +5,94 @@ class GunjalaTransliterator : Transliterator {
 
     companion object {
         // Gunjala Gondi combining marks
-        const val VIRAMA = "\uD806\uDE3A"     // U+1193A - Virama (conjunct)
-        const val HALANTA = "\uD806\uDE3B"     // U+1193B - Final consonant marker
-        const val ANUSVARA = "\uD806\uDE38"    // U+11938 - Nasalization
-        const val VISARGA = "\uD806\uDE39"     // U+11939 - Aspiration
-        const val NUKTA = "\uD806\uDE3C"       // U+1193C - Nukta
-        const val REPHA = "\uD806\uDE3D"       // U+1193D - Repha
-        const val OM = "\uD806\uDE3E"          // U+1193E - Om sign
+        const val VIRAMA = "𑶗"     // U+11D97 - Virama
+        const val HALANTA = "𑶗"    // U+11D97 - Using Virama as Halanta equivalence
+        const val ANUSVARA = "◌𑶕"   // U+11D95 - Anusvara
+        const val VISARGA = "𑶖"    // U+11D96 - Visarga
+        const val OM = "𑶘"         // U+11D98 - Om
 
-        // Independent Vowels: U+11900–U+1190F
+        // Independent Vowels: U+11D60–U+11D6B
         private val independentVowels = mapOf(
-            "RRi" to "\uD806\uDE07", "R^i" to "\uD806\uDE07",
-            "RRI" to "\uD806\uDE07", "R^I" to "\uD806\uDE07",
-            "aa" to "\uD806\uDE01", "ee" to "\uD806\uDE03", "oo" to "\uD806\uDE05",
-            "ai" to "\uD806\uDE08", "aI" to "\uD806\uDE08", "ei" to "\uD806\uDE08",
-            "au" to "\uD806\uDE0B", "aU" to "\uD806\uDE0B", "ou" to "\uD806\uDE0B",
-            "A" to "\uD806\uDE01", "I" to "\uD806\uDE03", "U" to "\uD806\uDE05",
-            "E" to "\uD806\uDE08", "O" to "\uD806\uDE09",
-            "Ri" to "\uD806\uDE07", ".r" to "\uD806\uDE07",
-            "a" to "\uD806\uDE00", "i" to "\uD806\uDE02", "u" to "\uD806\uDE04",
-            "e" to "\uD806\uDE06", "o" to "\uD806\uDE09",
-            "ā" to "\uD806\uDE01", "ī" to "\uD806\uDE03", "ū" to "\uD806\uDE05",
-            "ē" to "\uD806\uDE06", "ō" to "\uD806\uDE09", "ṛ" to "\uD806\uDE07"
+            "aa" to "𑵡", "A" to "𑵡", "ā" to "𑵡",
+            "i" to "𑵢",
+            "ii" to "𑵣", "I" to "𑵣", "ee" to "𑵣", "ī" to "𑵣",
+            "u" to "𑵤",
+            "uu" to "𑵥", "oo" to "𑵥", "U" to "𑵥", "ū" to "𑵥",
+            "e" to "𑵧", "E" to "𑵧", // Ee (U+11D67)
+            "ai" to "𑵨", "aI" to "𑵨", "ei" to "𑵨",
+            "o" to "𑵪", "O" to "𑵪", // Oo (U+11D6A)
+            "au" to "𑵫", "aU" to "𑵫", "ou" to "𑵫",
+            "a" to "𑵠"
         )
 
-        // Vowel Signs (Matras): U+11930–U+11937
+        // Vowel Signs (Matras): U+11D8A–U+11D94
         private val vowelSigns = mapOf(
-            "RRi" to "\uD806\uDE37", "R^i" to "\uD806\uDE37",
-            "RRI" to "\uD806\uDE37", "R^I" to "\uD806\uDE37",
-            "aa" to "\uD806\uDE30", "ee" to "\uD806\uDE32", "oo" to "\uD806\uDE34",
-            "ai" to "\uD806\uDE35", "aI" to "\uD806\uDE35", "ei" to "\uD806\uDE35",
-            "au" to "\uD806\uDE36", "aU" to "\uD806\uDE36", "ou" to "\uD806\uDE36",
-            "A" to "\uD806\uDE30", "I" to "\uD806\uDE32", "U" to "\uD806\uDE34",
-            "E" to "\uD806\uDE35", "O" to "\uD806\uDE33",
-            "Ri" to "\uD806\uDE37", ".r" to "\uD806\uDE37",
-            "i" to "\uD806\uDE31", "u" to "\uD806\uDE33",
-            "e" to "\uD806\uDE35", "o" to "\uD806\uDE33",
-            "ā" to "\uD806\uDE30", "ī" to "\uD806\uDE32", "ū" to "\uD806\uDE34",
-            "ē" to "\uD806\uDE35", "ō" to "\uD806\uDE33", "ṛ" to "\uD806\uDE37"
+            "aa" to "𑶊", "A" to "𑶊", "ā" to "𑶊",
+            "i" to "𑶋",
+            "ii" to "𑶌", "I" to "𑶌", "ee" to "𑶌", "ī" to "𑶌",
+            "u" to "𑶍",
+            "uu" to "𑶎", "oo" to "𑶎", "U" to "𑶎", "ū" to "𑶎",
+            "e" to "◌𑶐", "E" to "◌𑶐", // Ee (U+11D90)
+            "ai" to "◌𑶑", "aI" to "◌𑶑", "ei" to "◌𑶑",
+            "o" to "𑶓", "O" to "𑶓", // Oo (U+11D93)
+            "au" to "𑶔", "aU" to "𑶔", "ou" to "𑶔"
         )
 
-        // Consonants: U+11910–U+1192F
+        // Consonants: U+11D6C–U+11D89
         private val consonants = mapOf(
-            "GY" to "\uD806\uDE2F", "dny" to "\uD806\uDE2F", "jny" to "\uD806\uDE2F",
-            "shh" to "\uD806\uDE2A", "chh" to "\uD806\uDE12",
-            "kh" to "\uD806\uDE11", "gh" to "\uD806\uDE13",
-            "ng" to "\uD806\uDE14", "~N" to "\uD806\uDE14", "N^" to "\uD806\uDE14",
-            "k" to "\uD806\uDE10", "K" to "\uD806\uDE11",
-            "g" to "\uD806\uDE12", "G" to "\uD806\uDE13",
-            "Ch" to "\uD806\uDE16",
-            "ch" to "\uD806\uDE15",
-            "jh" to "\uD806\uDE18",
-            "ny" to "\uD806\uDE19", "JN" to "\uD806\uDE19", "~n" to "\uD806\uDE19",
-            "c" to "\uD806\uDE15", "C" to "\uD806\uDE16",
-            "j" to "\uD806\uDE17", "J" to "\uD806\uDE18",
-            "Th" to "\uD806\uDE1B", "ṭh" to "\uD806\uDE1B",
-            "Dh" to "\uD806\uDE1D", "ḍh" to "\uD806\uDE1D",
-            "T" to "\uD806\uDE1A", "ṭ" to "\uD806\uDE1A",
-            "D" to "\uD806\uDE1C", "ḍ" to "\uD806\uDE1C",
-            "N" to "\uD806\uDE1E", "ṇ" to "\uD806\uDE1E",
-            "th" to "\uD806\uDE20", "dh" to "\uD806\uDE22",
-            "t" to "\uD806\uDE1F", "d" to "\uD806\uDE21", "n" to "\uD806\uDE23",
-            "ph" to "\uD806\uDE25", "bh" to "\uD806\uDE27",
-            "p" to "\uD806\uDE24", "P" to "\uD806\uDE25", "f" to "\uD806\uDE25",
-            "b" to "\uD806\uDE26", "B" to "\uD806\uDE27",
-            "m" to "\uD806\uDE28",
-            "y" to "\uD806\uDE29", "r" to "\uD806\uDE2A",
-            "l" to "\uD806\uDE2B", "L" to "\uD806\uDE2C", "ḷ" to "\uD806\uDE2C",
-            "v" to "\uD806\uDE2D", "w" to "\uD806\uDE2D", "W" to "\uD806\uDE2D", "V" to "\uD806\uDE2D",
-            "Sh" to "\uD806\uDE2F", "sh" to "\uD806\uDE2E",
-            "S" to "\uD806\uDE2F", "ss" to "\uD806\uDE2F",
-            "s" to "\uD806\uDE2E",
-            "ś" to "\uD806\uDE2E", "ṣ" to "\uD806\uDE2F",
-            "h" to "\uD806\uDE2C", "H" to "\uD806\uDE2C",
-            "ñ" to "\uD806\uDE19", "ṅ" to "\uD806\uDE14"
+            "ka" to "𑵱", "k" to "𑵱",
+            "kha" to "𑵲", "kh" to "𑵲", "K" to "𑵲",
+            "ga" to "𑵶", "g" to "𑵶",
+            "gha" to "𑵷", "gh" to "𑵷", "G" to "𑵷",
+            "nga" to "𑶄", "ng" to "𑶄", "~N" to "𑶄", "N^" to "𑶄",
+
+            "cha" to "𑵻", "ch" to "𑵻", "c" to "𑵻",
+            "chha" to "𑵼", "chh" to "𑵼", "C" to "𑵼", "Ch" to "𑵼",
+            "ja" to "𑶀", "j" to "𑶀",
+            "jha" to "𑶁", "jh" to "𑶁", "J" to "𑶁",
+            "nya" to "◌𑶕", "~n" to "◌𑶕", "ñ" to "◌𑶕", // Using Anusvara
+
+            "Ta" to "𑵽", "T" to "𑵽", "ṭ" to "𑵽",
+            "Tha" to "𑵾", "Th" to "𑵾", "ṭh" to "𑵾",
+            "Da" to "𑶂", "D" to "𑶂", "ḍ" to "𑶂",
+            "Dha" to "𑶃", "Dh" to "𑶃", "ḍh" to "𑶃",
+            "Na" to "𑵺", "N" to "𑵺", "ṇ" to "𑵺", 
+
+            "ta" to "𑵳", "t" to "𑵳",
+            "tha" to "𑵴", "th" to "𑵴",
+            "da" to "𑵸", "d" to "𑵸",
+            "dha" to "𑵹", "dh" to "𑵹",
+            "na" to "𑵺", "n" to "𑵺",
+
+            "pa" to "𑶅", "p" to "𑶅",
+            "pha" to "𑶆", "ph" to "𑶆", "f" to "𑶆", "P" to "𑶆",
+            "ba" to "𑵮", "b" to "𑵮",
+            "bha" to "𑵯", "bh" to "𑵯", "B" to "𑵯",
+            "ma" to "𑵰", "m" to "𑵰",
+
+            "ya" to "𑵬", "y" to "𑵬",
+            "ra" to "𑶈", "r" to "𑶈",
+            "la" to "𑵵", "l" to "𑵵",
+            "va" to "𑵭", "v" to "𑵭", "w" to "𑵭",
+            "sha" to "𑶉", "sh" to "𑶉", "S" to "𑶉", "s" to "𑶉",
+            "ha" to "𑶇", "h" to "𑶇", "H" to "𑶇",
+            "lla" to "𑵿", "L" to "𑵿", "ḷ" to "𑵿",
+
+            // Missing QWERTY mappings to prevent English fallback
+            "q" to "𑵱", "Q" to "𑵱", // Maps to ka
+            "z" to "𑶀", "Z" to "𑶀", // Maps to ja
+            "x" to "𑵱𑶗𑶉", "X" to "𑵱𑶗𑶉" // Maps to ksha (ka + virama + sa)
         )
 
-        private val nuktaConsonants = mapOf(
-            ".Dh" to "\uD806\uDE1D$NUKTA",
-            ".D" to "\uD806\uDE1C$NUKTA",
-            "q" to "\uD806\uDE10$NUKTA", "Q" to "\uD806\uDE10$NUKTA",
-            "z" to "\uD806\uDE17$NUKTA"
-        )
-
-        // Gunjala Gondi Digits: U+11950–U+11959
+        // Gunjala Gondi Digits: U+11DA0–U+11DA9
         private val numbers = mapOf(
-            "0" to "\uD806\uDE50", "1" to "\uD806\uDE51", "2" to "\uD806\uDE52",
-            "3" to "\uD806\uDE53", "4" to "\uD806\uDE54", "5" to "\uD806\uDE55",
-            "6" to "\uD806\uDE56", "7" to "\uD806\uDE57", "8" to "\uD806\uDE58",
-            "9" to "\uD806\uDE59"
+            "0" to "𑶠", "1" to "𑶡", "2" to "𑶢",
+            "3" to "𑶣", "4" to "𑶤", "5" to "𑶥",
+            "6" to "𑶦", "7" to "𑶧", "8" to "𑶨",
+            "9" to "𑶩"
         )
 
         private val maxConsonantLen = consonants.keys.maxOf { it.length }
-        private val maxNuktaLen = nuktaConsonants.keys.maxOf { it.length }
         private val maxVowelSignLen = vowelSigns.keys.maxOf { it.length }
         private val maxIndVowelLen = independentVowels.keys.maxOf { it.length }
     }
@@ -219,43 +214,6 @@ class GunjalaTransliterator : Transliterator {
                 continue
             }
 
-            // REPHA: r after vowel, before consonant
-            if (ch == 'r' && hasVowel && isFollowedByConsonant(word, i + 1)) {
-                buf.append(REPHA)
-                hasConsonant = false
-                hasVowel = false
-                i++
-                continue
-            }
-
-            // NUKTA CONSONANTS
-            val nuktaMatch = matchMap(word, i, nuktaConsonants, maxNuktaLen)
-            if (nuktaMatch != null) {
-                if (hasConsonant && !hasVowel) buf.append(VIRAMA)
-                buf.append(nuktaMatch.first)
-                i += nuktaMatch.second
-                hasConsonant = true
-                hasVowel = false
-                // Consume following vowel
-                if (i < word.length && word[i] == 'a') {
-                    val next = i + 1
-                    if (next < word.length) {
-                        when (word[next]) {
-                            'a', 'A' -> { buf.append(vowelSigns["aa"]!!); i = next + 1; hasVowel = true; continue }
-                            'i', 'I' -> { buf.append(vowelSigns["ai"]!!); i = next + 1; hasVowel = true; continue }
-                            'u', 'U' -> { buf.append(vowelSigns["au"]!!); i = next + 1; hasVowel = true; continue }
-                        }
-                    }
-                    i++
-                    hasVowel = true
-                    continue
-                }
-                val vi = consumeVowel(word, i, buf)
-                if (vi > i) hasVowel = true
-                i = vi
-                continue
-            }
-
             // CONSONANTS
             val consMatch = matchMap(word, i, consonants, maxConsonantLen)
             if (consMatch != null) {
@@ -325,12 +283,6 @@ class GunjalaTransliterator : Transliterator {
             return start + vs.second
         }
         return start
-    }
-
-    private fun isFollowedByConsonant(word: String, pos: Int): Boolean {
-        if (pos >= word.length) return false
-        return matchMap(word, pos, consonants, maxConsonantLen) != null ||
-                matchMap(word, pos, nuktaConsonants, maxNuktaLen) != null
     }
 
     private fun matchMap(

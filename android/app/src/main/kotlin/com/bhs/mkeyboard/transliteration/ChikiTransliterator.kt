@@ -74,7 +74,12 @@ class ChikiTransliterator : Transliterator {
             "ñ" to "ᱧ",               // INYA
             "ṅ" to "ᱶ",               // MU GAAHLAA
             "ś" to "ᱥ",               // IS
-            "ṣ" to "ᱥ"                // IS
+            "ṣ" to "ᱥ",                // IS
+
+            // Missing QWERTY mappings to prevent English fallback
+            "q" to "ᱠ", "Q" to "ᱠ",    // Maps to KO (k)
+            "z" to "ᱡ", "Z" to "ᱡ",    // Maps to LICH (j)
+            "x" to "ᱠᱥ", "X" to "ᱠᱥ"   // Maps to KO+IS (ks/x)
         )
 
         // Ol Chiki vowels — standalone letters (not combining marks)

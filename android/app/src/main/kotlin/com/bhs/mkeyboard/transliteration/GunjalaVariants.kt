@@ -1,8 +1,8 @@
 package com.bhs.mkeyboard.transliteration
 
-object GondiVariants {
+object GunjalaVariants {
 
-    private val transliterator = GondiTransliterator()
+    private val transliterator = GunjalaTransliterator()
 
     private val matraSuffixes = listOf(
         "aa", "i", "ee", "u", "oo", "Ri", "e", "ai", "o", "au"
@@ -13,7 +13,7 @@ object GondiVariants {
 
         val seen = linkedSetOf<String>()
 
-        // Inherent form (ka, ga, etc.)
+        // Inherent form
         seen += inherent
 
         // Matra forms (barakhadi)
@@ -21,26 +21,22 @@ object GondiVariants {
             safeTransliterate(baseChar + suffix)?.let { seen += it }
         }
 
-        // Anusvara (kaM)
+        // Anusvara
         safeTransliterate(baseChar + "a.n")?.let { seen += it }
 
-        // Chandrabindu (ka.N)
-        safeTransliterate(baseChar + "a.N")?.let { seen += it }
-
-        // Visarga (kaH)
+        // Visarga
         safeTransliterate(baseChar + "a.h")?.let { seen += it }
 
-        // Halant form (k without vowel)
+        // Halant form
         safeTransliterate(baseChar)?.let { seen += it }
 
-        // Rakar form (kra)
+        // Rakar form
         safeTransliterate(baseChar + "ra")?.let { seen += it }
 
         return seen.toList()
     }
 
     private fun safeTransliterate(raw: String): String? {
-        // Use isComposing=false to get complete forms including halanta
         val result = transliterator.transliterate(raw, isComposing = false)
         return result.takeIf { it.isNotBlank() && it != raw }
     }

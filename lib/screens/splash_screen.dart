@@ -64,57 +64,86 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // App Logo or Icon
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                color: Colors.orange.shade100,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.keyboard, size: 60, color: Colors.orange),
-            ),
-            const SizedBox(height: 32),
+      backgroundColor: const Color(0xFFFFF8E1), // Light Beige
+      body: Stack(
+        children: [
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // App Logo or Icon
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFCCBC), // Light Terracotta
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.keyboard,
+                    size: 60,
+                    color: Color(0xFFBF360C), // Terracotta
+                  ),
+                ),
+                const SizedBox(height: 32),
 
-            // App Name
-            const Text(
-              'Hindi & Gondi Keyboard',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                // App Name
+                const Text(
+                  'Hindi & Gondi Keyboard',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF3E2723), // Dark Brown
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Editor & Settings',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF5D4037),
+                  ), // Medium Brown
+                ),
+
+                const SizedBox(height: 48),
+
+                // Progress
+                SizedBox(
+                  width: 200,
+                  child: LinearProgressIndicator(
+                    value: _progress,
+                    backgroundColor: const Color(0xFFFFCCBC),
+                    color: const Color(0xFFBF360C),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  _status,
+                  style: TextStyle(fontSize: 14, color: Color(0xFF5D4037)),
+                ),
+              ],
+            ),
+          ),
+          // Footer
+          const Positioned(
+            left: 0,
+            right: 0,
+            bottom: 24,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                'GondiDarshan.org : Preserving and promoting Gond tribal heritage through technology.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF5D4037),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              'Editor & Settings',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-
-            const SizedBox(height: 48),
-
-            // Progress
-            SizedBox(
-              width: 200,
-              child: LinearProgressIndicator(
-                value: _progress == 0 ? null : _progress,
-                backgroundColor: Colors.grey.shade200,
-                color: Colors.orange,
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _status,
-              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

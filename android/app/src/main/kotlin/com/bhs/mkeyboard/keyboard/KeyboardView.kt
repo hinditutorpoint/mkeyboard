@@ -28,10 +28,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.bhs.mkeyboard.R
-import com.bhs.mkeyboard.transliteration.GondiTransliterator
-import com.bhs.mkeyboard.transliteration.GondiVariants
-import com.bhs.mkeyboard.transliteration.HindiTransliterator
-import com.bhs.mkeyboard.transliteration.HindiVariants
+import com.bhs.mkeyboard.transliteration.*
 
 @Composable
 fun KeyboardView(
@@ -74,14 +71,36 @@ fun KeyboardView(
 ) {
     val context = LocalContext.current
     val settings = remember(settingsVersion) { KeyboardSettings(context) }
-    
-    // SuggestionEngine is now a Singleton to avoid re-loading on every recomposition
-    val suggestionEngine = remember { SuggestionEngine.getInstance(context) }
-    
-    val gondiFontFamily = remember { FontFamily(Font(R.font.noto_sans_masaram_gondi)) }
 
+    val suggestionEngine = remember { SuggestionEngine.getInstance(context) }
+
+    // ── Font Families ───────────────────────────────────────────
+    val gondiFontFamily = remember { FontFamily(Font(R.font.noto_sans_masaram_gondi)) }
+    val gunjalaFontFamily = remember { FontFamily(Font(R.font.noto_sans_gunjala_gondi)) }
+    val chikiFontFamily = remember { FontFamily(Font(R.font.noto_sans_ol_chiki)) }
+
+    // Current font based on language
+    val currentFontFamily = when (currentLanguage) {
+        KeyboardLanguage.GONDI -> gondiFontFamily
+        KeyboardLanguage.GUNJALA -> gunjalaFontFamily
+        KeyboardLanguage.CHIKI -> chikiFontFamily
+        else -> null
+    }
+
+    // ── Transliterators ─────────────────────────────────────────
     val hindiTransliterator = remember { HindiTransliterator() }
     val gondiTransliterator = remember { GondiTransliterator() }
+    val gunjalaTransliterator = remember { GunjalaTransliterator() }
+    val chikiTransliterator = remember { ChikiTransliterator() }
+
+    // Get transliterator for current language
+    val currentTransliterator: Transliterator? = when (currentLanguage) {
+        KeyboardLanguage.HINDI -> hindiTransliterator
+        KeyboardLanguage.GONDI -> gondiTransliterator
+        KeyboardLanguage.GUNJALA -> gunjalaTransliterator
+        KeyboardLanguage.CHIKI -> chikiTransliterator
+        KeyboardLanguage.ENGLISH -> null
+    }
 
     val popupState = remember { KeyPopupState() }
 
@@ -92,6 +111,7 @@ fun KeyboardView(
             inputConfig.keyboardType == ImeActionHelper.KeyboardType.PHONE ||
             inputConfig.keyboardType == ImeActionHelper.KeyboardType.DECIMAL
 
+    // ── Suggestions ─────────────────────────────────────────────
     val activeSuggestions = if (glideSuggestions.isNotEmpty()) {
         glideSuggestions
     } else if (composingText.isEmpty()) {
@@ -99,37 +119,49 @@ fun KeyboardView(
     } else {
         remember(composingText, transliteratedText, currentLanguage, settingsVersion) {
             if (settings.showSuggestions) {
-                suggestionEngine.getSuggestions(composingText, currentLanguage.ordinal, transliteratedText)
+                suggestionEngine.getSuggestions(
+                    composingText, currentLanguage.ordinal, transliteratedText
+                )
             } else emptyList()
         }
     }
     val hasSuggestions = activeSuggestions.isNotEmpty()
-    
+
     var showSymbols by remember { mutableStateOf(false) }
     var symbolPageIndex by remember { mutableStateOf(0) }
     var showThemePicker by remember { mutableStateOf(false) }
     var showEmoji by remember { mutableStateOf(false) }
 
+    // ── Layout Selection ────────────────────────────────────────
     val layout = when {
         showSymbols -> if (symbolPageIndex == 0) {
-            if (currentLanguage == KeyboardLanguage.GONDI) KeyboardLayouts.gondiSymbols1
-            else KeyboardLayouts.symbols1
+            when (currentLanguage) {
+                KeyboardLanguage.GONDI -> KeyboardLayouts.gondiSymbols1
+                KeyboardLanguage.GUNJALA -> KeyboardLayouts.gunjalaSymbols1
+                KeyboardLanguage.CHIKI -> KeyboardLayouts.chikiSymbols1
+                else -> KeyboardLayouts.symbols1
+            }
         } else KeyboardLayouts.symbols2
         else -> when (currentLanguage) {
             KeyboardLanguage.ENGLISH -> KeyboardLayouts.englishLetters
             KeyboardLanguage.HINDI -> KeyboardLayouts.hindiLetters
             KeyboardLanguage.GONDI -> KeyboardLayouts.gondiLetters
+            KeyboardLanguage.GUNJALA -> KeyboardLayouts.gunjalaLetters
+            KeyboardLanguage.CHIKI -> KeyboardLayouts.chikiLetters
         }
     }
+
+    // Whether to show transliteration hints on keys
+    val showHints = currentLanguage != KeyboardLanguage.ENGLISH && !showSymbols
 
     LaunchedEffect(showSymbols, showThemePicker, showEmoji, isVoiceActive) {
         popupState.dismiss()
     }
 
-    // Track keyboard position in window for overlay positioning
     var keyboardTopInWindow by remember { mutableStateOf(0f) }
 
     Box(modifier = modifier.fillMaxWidth()) {
+        // Wallpaper background
         if (currentWallpaperUrl != null) {
             AsyncImage(
                 model = ImageRequest.Builder(context)
@@ -143,11 +175,11 @@ fun KeyboardView(
             )
         }
 
-        // Main keyboard column — fixed size, clips its own content
+        // Main keyboard column
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .clipToBounds()  // Prevent content from expanding outside
+                .clipToBounds()
                 .background(
                     if (currentWallpaperUrl != null) currentTheme.backgroundColor.copy(alpha = 0.7f)
                     else currentTheme.backgroundColor
@@ -183,6 +215,7 @@ fun KeyboardView(
                     onAction = onEnter
                 )
             } else {
+                // ── Toolbar ─────────────────────────────────────
                 ToolbarRow(
                     theme = currentTheme,
                     onSettingsClick = onSettingsClick,
@@ -206,9 +239,10 @@ fun KeyboardView(
                         }
                     },
                     hasSuggestions = hasSuggestions,
-                    fontFamily = gondiFontFamily
+                    fontFamily = currentFontFamily
                 )
 
+                // ── Theme Picker ────────────────────────────────
                 if (showThemePicker) {
                     ThemeWallpaperPicker(
                         currentTheme = currentTheme,
@@ -223,6 +257,7 @@ fun KeyboardView(
                     )
                 }
 
+                // ── Emoji Picker ────────────────────────────────
                 if (showEmoji) {
                     EmojiPicker(
                         theme = currentTheme,
@@ -230,11 +265,16 @@ fun KeyboardView(
                     )
                 }
 
+                // ── Main Keyboard ───────────────────────────────
                 if (!showThemePicker && !showEmoji) {
                     // Number row
                     if (settings.showNumberRow && !showSymbols) {
-                        val numberKeys = if (currentLanguage == KeyboardLanguage.GONDI)
-                            KeyboardLayouts.gondiNumbers[0] else KeyboardLayouts.numbers[0]
+                        val numberKeys = when (currentLanguage) {
+                            KeyboardLanguage.GONDI -> KeyboardLayouts.gondiNumbers[0]
+                            KeyboardLanguage.GUNJALA -> KeyboardLayouts.gunjalaNumbers[0]
+                            KeyboardLanguage.CHIKI -> KeyboardLayouts.chikiNumbers[0]
+                            else -> KeyboardLayouts.numbers[0]
+                        }
                         KeyRow(
                             keys = numberKeys,
                             theme = currentTheme,
@@ -243,19 +283,18 @@ fun KeyboardView(
                             hapticEnabled = settings.hapticFeedback,
                             soundEnabled = settings.soundOnKeyPress,
                             hasWallpaper = currentWallpaperUrl != null,
-                            fontFamily = if (currentLanguage == KeyboardLanguage.GONDI)
-                                gondiFontFamily else null,
+                            fontFamily = currentFontFamily,
                             currentLanguage = currentLanguage,
                             showHints = false,
                             showSymbols = false,
-                            hindiTransliterator = hindiTransliterator,
-                            gondiTransliterator = gondiTransliterator,
+                            currentTransliterator = currentTransliterator,
                             onKeyTap = { key -> onInput(key, false) }
                         )
                     }
 
                     Spacer(modifier = Modifier.height(2.dp))
 
+                    // Letter rows
                     layout.forEachIndexed { index, row ->
                         val startKey = if (index == 2) {
                             if (showSymbols) {
@@ -272,14 +311,11 @@ fun KeyboardView(
                             hapticEnabled = settings.hapticFeedback,
                             soundEnabled = settings.soundOnKeyPress,
                             hasWallpaper = currentWallpaperUrl != null,
-                            fontFamily = if (currentLanguage == KeyboardLanguage.GONDI)
-                                gondiFontFamily else null,
+                            fontFamily = currentFontFamily,
                             currentLanguage = currentLanguage,
-                            showHints = (currentLanguage == KeyboardLanguage.GONDI ||
-                                    currentLanguage == KeyboardLanguage.HINDI) && !showSymbols,
+                            showHints = showHints,
                             showSymbols = showSymbols,
-                            hindiTransliterator = hindiTransliterator,
-                            gondiTransliterator = gondiTransliterator,
+                            currentTransliterator = currentTransliterator,
                             onKeyTap = { key ->
                                 popupState.dismiss()
                                 val output = if (isShifted) key.uppercase() else key
@@ -305,6 +341,7 @@ fun KeyboardView(
                         Spacer(modifier = Modifier.height(settings.keySpacing.dp))
                     }
 
+                    // Bottom row
                     BottomRow(
                         theme = currentTheme,
                         currentLanguage = currentLanguage,
@@ -314,6 +351,7 @@ fun KeyboardView(
                         hasWallpaper = currentWallpaperUrl != null,
                         hasSuggestions = hasSuggestions,
                         actionButton = inputConfig.actionButton,
+                        currentFontFamily = currentFontFamily,
                         onLanguageToggle = {
                             popupState.dismiss()
                             onLanguageChanged(currentLanguage.next())
@@ -336,14 +374,13 @@ fun KeyboardView(
                             showEmoji = !showEmoji
                             showThemePicker = false
                         },
-                        onInput = { text -> onInput(text, true) },
-                        gondiFontFamily = gondiFontFamily
+                        onInput = { text -> onInput(text, true) }
                     )
                 }
             }
         }
 
-        // Glide trail — on top of keyboard but inside bounds
+        // Glide trail overlay
         if (isGlideActive && glideTrailPoints.isNotEmpty()) {
             GlideTrailCanvas(
                 trailPoints = glideTrailPoints,
@@ -352,22 +389,22 @@ fun KeyboardView(
             )
         }
 
-        // KEY POPUP OVERLAY — rendered INSIDE the keyboard Box
-        // Uses absolute positioning within the keyboard bounds
-        // Does NOT affect keyboard size because it uses matchParentSize
+        // Key popup overlay
         if (popupState.isActive() && !showThemePicker && !showEmoji && !isVoiceActive) {
             KeyPopupOverlay(
                 popupState = popupState,
                 theme = currentTheme,
                 hasWallpaper = currentWallpaperUrl != null,
                 hapticEnabled = settings.hapticFeedback,
-                modifier = Modifier.matchParentSize()  // Same size as keyboard, no expansion
+                modifier = Modifier.matchParentSize()
             )
         }
     }
 }
 
-// ── KeyRow ───────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════
+// KeyRow
+// ═══════════════════════════════════════════════════════════════════
 
 @Composable
 private fun KeyRow(
@@ -382,8 +419,7 @@ private fun KeyRow(
     currentLanguage: KeyboardLanguage,
     showHints: Boolean,
     showSymbols: Boolean,
-    hindiTransliterator: HindiTransliterator,
-    gondiTransliterator: GondiTransliterator,
+    currentTransliterator: Transliterator?,
     onKeyTap: (String) -> Unit,
     startKey: String? = null,
     endKey: String? = null,
@@ -395,6 +431,7 @@ private fun KeyRow(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
+        // Start key (Shift or symbol toggle)
         if (startKey != null) {
             val keyTheme = if (startKey == "⇧" && isShift) {
                 theme.copy(specialKeyColor = theme.accentColor)
@@ -414,35 +451,54 @@ private fun KeyRow(
             )
         }
 
+        // Letter keys
         keys.forEach { key ->
+            // Get variants for long-press popup
             val variants = remember(key, currentLanguage, showSymbols, isShift) {
                 if (!showSymbols) {
                     val inputKey = if (isShift) key.uppercase() else key
                     when (currentLanguage) {
                         KeyboardLanguage.GONDI -> GondiVariants.getVariants(inputKey)
+                        KeyboardLanguage.GUNJALA -> GunjalaVariants.getVariants(inputKey)
+                        KeyboardLanguage.CHIKI -> ChikiVariants.getVariants(inputKey)
                         KeyboardLanguage.HINDI -> HindiVariants.getVariants(inputKey)
                         KeyboardLanguage.ENGLISH -> emptyList()
                     }
                 } else emptyList()
             }
 
+            // Display label and hint
             val displayLabel: String
             val hintText: String?
 
-            if (showHints) {
+            if (showHints && currentTransliterator != null) {
                 val inputKey = if (isShift) key.uppercase() else key
-                val isGondi = currentLanguage == KeyboardLanguage.GONDI
-                val transliterator = if (isGondi) gondiTransliterator else hindiTransliterator
-                val base = transliterator.transliterate(inputKey)
+                val base = currentTransliterator.transliterate(inputKey)
 
-                displayLabel = if (isGondi) {
-                    if (base.endsWith("\uD807\uDD44") || base.endsWith("𑵄")) {
-                        transliterator.transliterate(inputKey + "a")
-                    } else base
-                } else {
-                    if (base.endsWith("्")) {
-                        transliterator.transliterate(inputKey + "a")
-                    } else base
+                displayLabel = when (currentLanguage) {
+                    KeyboardLanguage.GONDI -> {
+                        // Masaram Gondi halanta: 𑵄 (U+11D44)
+                        if (base.endsWith("𑵄")) {
+                            currentTransliterator.transliterate(inputKey + "a")
+                        } else base
+                    }
+                    KeyboardLanguage.GUNJALA -> {
+                        // Gunjala Gondi halanta: U+1193B
+                        if (base.endsWith("\uD806\uDE3B")) {
+                            currentTransliterator.transliterate(inputKey + "a")
+                        } else base
+                    }
+                    KeyboardLanguage.HINDI -> {
+                        // Hindi halant: ् (U+094D)
+                        if (base.endsWith("्")) {
+                            currentTransliterator.transliterate(inputKey + "a")
+                        } else base
+                    }
+                    KeyboardLanguage.CHIKI -> {
+                        // Ol Chiki is alphabetic — no halanta, show as-is
+                        base
+                    }
+                    KeyboardLanguage.ENGLISH -> inputKey
                 }
 
                 hintText = if (isShift) key.uppercase() else key.lowercase()
@@ -466,6 +522,7 @@ private fun KeyRow(
             )
         }
 
+        // End key (Backspace)
         if (endKey != null) {
             KeyButton(
                 label = endKey,
@@ -483,7 +540,9 @@ private fun KeyRow(
     }
 }
 
-// ── BottomRow ────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════
+// BottomRow
+// ═══════════════════════════════════════════════════════════════════
 
 @Composable
 private fun BottomRow(
@@ -495,65 +554,79 @@ private fun BottomRow(
     hasWallpaper: Boolean,
     hasSuggestions: Boolean,
     actionButton: ImeActionHelper.ActionButton = ImeActionHelper.ActionButton.ENTER,
+    currentFontFamily: FontFamily?,
     onLanguageToggle: () -> Unit,
     onSymbolToggle: () -> Unit,
     onSpace: () -> Unit,
     onEnter: () -> Unit,
     onEmojiClick: () -> Unit,
-    onInput: (String) -> Unit,
-    gondiFontFamily: FontFamily
+    onInput: (String) -> Unit
 ) {
-    // Action button appearance
     val actionLabel = actionButton.icon
-    val actionColor = when (actionButton) {
-        ImeActionHelper.ActionButton.SEARCH -> theme.accentColor
-        ImeActionHelper.ActionButton.GO -> theme.accentColor
-        ImeActionHelper.ActionButton.SEND -> theme.accentColor
-        ImeActionHelper.ActionButton.NEXT -> theme.accentColor
-        ImeActionHelper.ActionButton.DONE -> theme.accentColor
-        else -> theme.specialKeyColor
-    }
 
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
+        // Symbol toggle
         KeyButton(
             label = if (showSymbols) "ABC" else "?123",
-            theme = theme, isSpecial = true, weight = 1.2f, fontSize = 14f,
-            hapticEnabled = hapticEnabled, soundEnabled = soundEnabled,
-            hasWallpaper = hasWallpaper, onTap = onSymbolToggle
+            theme = theme,
+            isSpecial = true,
+            weight = 1.2f,
+            fontSize = 14f,
+            hapticEnabled = hapticEnabled,
+            soundEnabled = soundEnabled,
+            hasWallpaper = hasWallpaper,
+            onTap = onSymbolToggle
         )
 
+        // Language toggle
         KeyButton(
-            label = if (currentLanguage == KeyboardLanguage.GONDI) "𑴀𑴁"
-                    else currentLanguage.displayName,
-            theme = theme, isSpecial = true, weight = 1f,
-            hapticEnabled = hapticEnabled, soundEnabled = soundEnabled,
+            label = currentLanguage.displayName,
+            theme = theme,
+            isSpecial = true,
+            weight = 1f,
+            hapticEnabled = hapticEnabled,
+            soundEnabled = soundEnabled,
             hasWallpaper = hasWallpaper,
-            fontFamily = if (currentLanguage == KeyboardLanguage.GONDI) gondiFontFamily else null,
+            fontFamily = currentFontFamily,
             onTap = onLanguageToggle
         )
 
+        // Emoji button (only when suggestions shown)
         if (hasSuggestions) {
             KeyButton(
-                label = "😀", theme = theme, isSpecial = true, weight = 1f,
-                hapticEnabled = hapticEnabled, soundEnabled = soundEnabled,
-                hasWallpaper = hasWallpaper, onTap = onEmojiClick
+                label = "😀",
+                theme = theme,
+                isSpecial = true,
+                weight = 1f,
+                hapticEnabled = hapticEnabled,
+                soundEnabled = soundEnabled,
+                hasWallpaper = hasWallpaper,
+                onTap = onEmojiClick
             )
         }
 
+        // Space bar with language name
         KeyButton(
-            label = if (currentLanguage == KeyboardLanguage.GONDI) "𑴤𑴫𑴦𑴱𑴤 𑴎𑴽𑵀𑴘𑴳"
-                    else currentLanguage.name.lowercase().replaceFirstChar { it.uppercase() },
+            label = when (currentLanguage) {
+                KeyboardLanguage.ENGLISH -> "English"
+                KeyboardLanguage.HINDI -> "Hindi"
+                KeyboardLanguage.GONDI -> "𑴤𑴫𑴦𑴱𑴤 𑴎𑴽𑵀𑴘𑴲"
+                KeyboardLanguage.GUNJALA -> "\uD806\uDE12\uD806\uDE33\uD806\uDE23\uD806\uDE2D\uD806\uDE30\uD806\uDE2B\uD806\uDE30"
+                KeyboardLanguage.CHIKI -> "ᱚᱞ ᱪᱤᱠᱤ"
+            },
             theme = theme,
             weight = if (hasSuggestions) 3f else 4f,
-            hapticEnabled = hapticEnabled, soundEnabled = soundEnabled,
+            hapticEnabled = hapticEnabled,
+            soundEnabled = soundEnabled,
             hasWallpaper = hasWallpaper,
-            fontFamily = if (currentLanguage == KeyboardLanguage.GONDI) gondiFontFamily else null,
+            fontFamily = currentFontFamily,
             onTap = onSpace
         )
 
+        // Period
         KeyButton(
             label = ".",
             theme = theme,
@@ -564,8 +637,7 @@ private fun BottomRow(
             onTap = { onInput(".") }
         )
 
-
-        // Action button — changes based on input field type
+        // Action button
         KeyButton(
             label = actionLabel,
             theme = theme.copy(
@@ -582,9 +654,9 @@ private fun BottomRow(
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // Theme/Wallpaper Picker
-// ═══════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 
 @Composable
 private fun ThemeWallpaperPicker(
@@ -646,7 +718,7 @@ private fun ThemeWallpaperPicker(
                     Text(
                         text = title,
                         color = if (isSelected) currentTheme.accentColor
-                                else currentTheme.textColor.copy(alpha = 0.6f),
+                        else currentTheme.textColor.copy(alpha = 0.6f),
                         fontSize = 14.sp,
                         fontWeight = if (isSelected) FontWeight.SemiBold else null
                     )
@@ -658,7 +730,6 @@ private fun ThemeWallpaperPicker(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Close button
             Box(
                 modifier = Modifier
                     .size(32.dp)
@@ -671,7 +742,6 @@ private fun ThemeWallpaperPicker(
             }
         }
 
-        // Content
         when (selectedTab) {
             0 -> GboardThemesGrid(
                 currentTheme = currentTheme,
@@ -914,7 +984,7 @@ private fun GboardWallpapersGrid(
                     Text(
                         text = category.name,
                         color = if (isSelected) Color.White
-                                else currentTheme.textColor.copy(alpha = 0.8f),
+                        else currentTheme.textColor.copy(alpha = 0.8f),
                         fontSize = 12.sp,
                         fontWeight = if (isSelected) FontWeight.Medium else null
                     )
@@ -1033,6 +1103,10 @@ private fun GboardWallpaperCard(
         }
     }
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// Emoji Picker
+// ═══════════════════════════════════════════════════════════════════
 
 @Composable
 private fun EmojiPicker(

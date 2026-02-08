@@ -1,16 +1,16 @@
 package com.bhs.mkeyboard.keyboard
 
 /**
- * Keyboard layouts for English, Hindi, and Gondi
+ * Keyboard layouts for English, Hindi, Gondi, Gunjala Gondi, and Ol Chiki
  */
 object KeyboardLayouts {
-    
+
     val englishLetters = listOf(
         listOf("q", "w", "e", "r", "t", "y", "u", "i", "o", "p"),
         listOf("a", "s", "d", "f", "g", "h", "j", "k", "l"),
         listOf("z", "x", "c", "v", "b", "n", "m")
     )
-    
+
     val hindiLetters = listOf(
         listOf("q", "w", "e", "r", "t", "y", "u", "i", "o", "p"),
         listOf("a", "s", "d", "f", "g", "h", "j", "k", "l"),
@@ -22,13 +22,36 @@ object KeyboardLayouts {
         listOf("a", "s", "d", "f", "g", "h", "j", "k", "l"),
         listOf("z", "x", "c", "v", "b", "n", "m")
     )
-    
+
+    val gunjalaLetters = listOf(
+        listOf("q", "w", "e", "r", "t", "y", "u", "i", "o", "p"),
+        listOf("a", "s", "d", "f", "g", "h", "j", "k", "l"),
+        listOf("z", "x", "c", "v", "b", "n", "m")
+    )
+
+    val chikiLetters = listOf(
+        listOf("q", "w", "e", "r", "t", "y", "u", "i", "o", "p"),
+        listOf("a", "s", "d", "f", "g", "h", "j", "k", "l"),
+        listOf("z", "x", "c", "v", "b", "n", "m")
+    )
+
+    // ── NUMBER ROWS ─────────────────────────────────────────────
     val numbers = listOf(
         listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
     )
 
     val gondiNumbers = listOf(
         listOf("𑵑", "𑵒", "𑵓", "𑵔", "𑵕", "𑵖", "𑵗", "𑵘", "𑵙", "𑵐")
+    )
+
+    // Gunjala Gondi Digits: U+11DA0–U+11DA9
+    val gunjalaNumbers = listOf(
+        listOf("𑶡", "𑶢", "𑶣", "𑶤", "𑶥", "𑶦", "𑶧", "𑶨", "𑶩", "𑶠")
+    )
+
+    // Ol Chiki Digits: U+1C50–U+1C59 (BMP - no surrogates needed)
+    val chikiNumbers = listOf(
+        listOf("᱑", "᱒", "᱓", "᱔", "᱕", "᱖", "᱗", "᱘", "᱙", "᱐")
     )
 
     // ── NUMBER PAD LAYOUT (for number input fields) ─────────────
@@ -46,8 +69,9 @@ object KeyboardLayouts {
         listOf("7", "8", "9"),
         listOf("+", "0", ",")
     )
-    
-    // Page 1: Numbers + Common Symbols (Gboard Style)
+
+    // ── SYMBOL PAGES ────────────────────────────────────────────
+    // Page 1: Numbers + Common Symbols
     val symbols1 = listOf(
         listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0"),
         listOf("@", "#", "₹", "_", "&", "-", "+", "(", ")", "/"),
@@ -60,7 +84,19 @@ object KeyboardLayouts {
         listOf("*", "\"", "'", ":", ";", "!", "?")
     )
 
-    // Page 2: More Symbols (Gboard Style)
+    val gunjalaSymbols1 = listOf(
+        listOf("𑶡", "𑶢", "𑶣", "𑶤", "𑶥", "𑶦", "𑶧", "𑶨", "𑶩", "𑶠"),
+        listOf("@", "#", "₹", "_", "&", "-", "+", "(", ")", "/"),
+        listOf("*", "\"", "'", ":", ";", "!", "?")
+    )
+
+    val chikiSymbols1 = listOf(
+        listOf("᱑", "᱒", "᱓", "᱔", "᱕", "᱖", "᱗", "᱘", "᱙", "᱐"),
+        listOf("@", "#", "₹", "_", "&", "-", "+", "(", ")", "/"),
+        listOf("*", "\"", "'", ":", ";", "!", "?")
+    )
+
+    // Page 2: More Symbols (shared across all languages)
     val symbols2 = listOf(
         listOf("~", "`", "|", "•", "√", "π", "÷", "×", "§", "∆"),
         listOf("£", "¢", "€", "¥", "^", "°", "=", "{", "}", "\\"),
@@ -74,10 +110,10 @@ object KeyboardLayouts {
 enum class KeyboardLanguage(val displayName: String, val fontFamily: String?) {
     ENGLISH("EN", null),
     HINDI("हिं", null),
-    GONDI("𑴌𑴽", "MasaramGondi"), // Gondi (Standard)
-    GUNJALA("గొ", "GunjalaGondi"),           // Gunjala Gondi
-    CHIKI("ᱚᱞ", "OlChiki");           // Ol Chiki (Santali)
-    
+    GONDI("𑴌𑴽", "MasaramGondi"),
+    GUNJALA("గొ", "GunjalaGondi"),
+    CHIKI("ᱚᱞ", "OlChiki");
+
     fun next(): KeyboardLanguage {
         val values = entries
         val nextIndex = (ordinal + 1) % values.size

@@ -30,6 +30,8 @@ class ExportService {
     String fileName, {
     bool containsHindi = false,
     bool containsGondi = false,
+    bool containsGunjalaGondi = false,
+    bool containsOlChiki = false,
   }) async {
     try {
       final pdf = pw.Document();
@@ -53,6 +55,24 @@ class ExportService {
         );
         if (gondiFontData != null) {
           gondiFont = pw.Font.ttf(gondiFontData);
+        }
+      }
+
+      if (containsGunjalaGondi) {
+        final gunjalaGondiFontData = await _loadFontData(
+          'assets/fonts/NotoSansGunjalaGondi-Regular.ttf',
+        );
+        if (gunjalaGondiFontData != null) {
+          gondiFont = pw.Font.ttf(gunjalaGondiFontData);
+        }
+      }
+
+      if (containsOlChiki) {
+        final olChikiFontData = await _loadFontData(
+          'assets/fonts/NotoSansOlChiki-Regular.ttf',
+        );
+        if (olChikiFontData != null) {
+          gondiFont = pw.Font.ttf(olChikiFontData);
         }
       }
 

@@ -58,6 +58,8 @@ class VoiceInputManager(private val context: Context) {
             KeyboardLanguage.ENGLISH -> "en-US"
             KeyboardLanguage.HINDI -> "hi-IN"
             KeyboardLanguage.GONDI -> "hi-IN"
+            KeyboardLanguage.GUNJALA -> "hi-IN"
+            KeyboardLanguage.CHIKI -> "hi-IN"
         }
 
         // Check actual permission state

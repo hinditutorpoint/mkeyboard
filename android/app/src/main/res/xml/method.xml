@@ -4,22 +4,40 @@
     android:icon="@mipmap/ic_launcher"
     android:label="@string/app_name"
     android:supportsSwitchingToNextInputMethod="true">
-    
+
+    <!-- English -->
     <subtype
         android:label="English"
         android:imeSubtypeLocale="en_US"
         android:imeSubtypeMode="keyboard"
         android:icon="@mipmap/ic_launcher" />
-        
+
+    <!-- Hindi -->
     <subtype
         android:label="हिंदी (Hindi)"
         android:imeSubtypeLocale="hi_IN"
         android:imeSubtypeMode="keyboard"
         android:icon="@mipmap/ic_launcher" />
-        
+
+    <!-- Masaram Gondi -->
     <subtype
         android:label="𑴎𑴽𑵀𑴘𑴳 (Gondi)"
         android:imeSubtypeLocale="gon_IN"
         android:imeSubtypeMode="keyboard"
         android:icon="@mipmap/ic_launcher" />
+
+    <!-- Gunjala Gondi -->
+    <subtype
+        android:label="Gunjala Gondi"
+        android:imeSubtypeLocale="wsg_IN"
+        android:imeSubtypeMode="keyboard"
+        android:icon="@mipmap/ic_launcher" />
+
+    <!-- Ol Chiki (Santali) -->
+    <subtype
+        android:label="ᱚᱞ ᱪᱤᱠᱤ (Santali)"
+        android:imeSubtypeLocale="sat_IN"
+        android:imeSubtypeMode="keyboard"
+        android:icon="@mipmap/ic_launcher" />
+
 </input-method>

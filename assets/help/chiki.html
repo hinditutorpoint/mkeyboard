@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="sat">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ol Chiki Typing Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            padding: 12px;
+            line-height: 1.6
+        }
+
+        .header {
+            background: linear-gradient(135deg, #BF360C, #E64A19);
+            color: #fff;
+            padding: 20px 16px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            text-align: center
+        }
+
+        .header h1 {
+            font-size: 22px;
+            margin-bottom: 4px
+        }
+
+        .header p {
+            font-size: 13px;
+            opacity: 0.9
+        }
+
+        .section {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1)
+        }
+
+        .section h2 {
+            font-size: 16px;
+            color: #BF360C;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #FBE9E7
+        }
+
+        .section h3 {
+            font-size: 14px;
+            color: #555;
+            margin: 10px 0 6px
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0
+        }
+
+        th {
+            background: #FBE9E7;
+            color: #BF360C;
+            padding: 8px 6px;
+            text-align: left;
+            font-size: 12px;
+            border-bottom: 2px solid #FFCCBC
+        }
+
+        td {
+            padding: 7px 6px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px
+        }
+
+        td:first-child {
+            font-weight: 600;
+            color: #BF360C;
+            font-size: 20px
+        }
+
+        td:nth-child(2) {
+            font-family: monospace;
+            background: #f8f8f8;
+            border-radius: 4px;
+            padding: 4px 8px;
+            color: #333
+        }
+
+        .note {
+            background: #FFF8E1;
+            border-left: 3px solid #FFB300;
+            padding: 10px 12px;
+            border-radius: 0 8px 8px 0;
+            margin: 8px 0;
+            font-size: 12px
+        }
+
+        .tip {
+            background: #FBE9E7;
+            border-left: 3px solid #E64A19;
+            padding: 10px 12px;
+            border-radius: 0 8px 8px 0;
+            margin: 8px 0;
+            font-size: 12px
+        }
+
+        .example {
+            background: #E3F2FD;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin: 6px 0;
+            font-size: 13px
+        }
+
+        .example span {
+            font-weight: 600;
+            color: #1565C0
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #1B5E20, #43A047);
+            color: #fff;
+            padding: 20px 16px;
+            border-radius: 16px;
+            margin-top: 16px;
+            text-align: center
+        }
+
+        .footer h3 {
+            font-size: 16px;
+            margin-bottom: 6px
+        }
+
+        .footer p {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px
+        }
+
+        .footer a {
+            color: #A5D6A7;
+            text-decoration: none;
+            font-weight: 600
+        }
+
+        .support {
+            background: linear-gradient(135deg, #FF6B00, #FF9800);
+            color: #fff;
+            padding: 16px;
+            border-radius: 16px;
+            margin-top: 12px;
+            text-align: center
+        }
+
+        .support h3 {
+            font-size: 15px;
+            margin-bottom: 6px
+        }
+
+        .support a {
+            color: #FFF9C4;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 6px;
+            margin: 8px 0
+        }
+
+        .grid-item {
+            background: #FBE9E7;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center
+        }
+
+        .grid-item .char {
+            font-size: 22px;
+            color: #BF360C
+        }
+
+        .grid-item .label {
+            font-size: 10px;
+            color: #888;
+            margin-top: 2px
+        }
+
+        .info-box {
+            background: #E3F2FD;
+            border: 1px solid #90CAF9;
+            padding: 12px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-size: 12px
+        }
+
+        .highlight {
+            background: #FFF9C4;
+            border: 1px solid #FFF176;
+            padding: 12px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-size: 12px
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>ᱚᱞ ᱪᱤᱠᱤ Ol Chiki Typing Guide</h1>
+        <p>Santali Alphabet — ᱥᱟᱱᱛᱟᱲᱤ ᱚᱞ</p>
+    </div>
+
+    <div class="info-box">
+        ℹ️ <b>About Ol Chiki:</b> Created by Pandit Raghunath Murmu in 1925 for the Santali language. Unlike Hindi or
+        Gondi, Ol Chiki is an <b>alphabet</b> (not an abugida) — each letter represents one sound. No virama or halanta
+        needed! Unicode range: U+1C50–U+1C7F.
+    </div>
+
+    <div class="highlight">
+        ⭐ <b>Key Difference:</b> In Ol Chiki, vowels are <b>separate letters</b> (not combining marks). You type
+        consonant + vowel, and both appear as distinct letters. There is no "inherent vowel" concept like in Devanagari
+        or Gondi.
+    </div>
+
+    <!-- Vowels -->
+    <div class="section">
+        <h2>ᱟ Vowels (6 Letters)</h2>
+        <table>
+            <tr>
+                <th>Ol Chiki</th>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Sound</th>
+            </tr>
+            <tr>
+                <td>ᱟ</td>
+                <td>a / aa / A</td>
+                <td>LA</td>
+                <td>a / aa</td>
+            </tr>
+            <tr>
+                <td>ᱤ</td>
+                <td>i / ee / I</td>
+                <td>IH</td>
+                <td>i / ii</td>
+            </tr>
+            <tr>
+                <td>ᱩ</td>
+                <td>u / oo / U</td>
+                <td>UUH</td>
+                <td>u / uu</td>
+            </tr>
+            <tr>
+                <td>ᱮ</td>
+                <td>e / ai / E</td>
+                <td>OLE</td>
+                <td>e / ai</td>
+            </tr>
+            <tr>
+                <td>ᱳ</td>
+                <td>o / au / O</td>
+                <td>OH</td>
+                <td>o / au</td>
+            </tr>
+        </table>
+
+        <div class="tip">💡 Ol Chiki has fewer vowel distinctions than Devanagari. Short/long are the same letter.</div>
+    </div>
+
+    <!-- Consonants -->
+    <div class="section">
+        <h2>ᱠ Consonants</h2>
+
+        <h3>Stop Consonants</h3>
+        <table>
+            <tr>
+                <th>Ol Chiki</th>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Sound</th>
+            </tr>
+            <tr>
+                <td>ᱠ</td>
+                <td>k / K</td>
+                <td>KO</td>
+                <td>Ka</td>
+            </tr>
+            <tr>
+                <td>ᱜ</td>
+                <td>g / G</td>
+                <td>PHAARKAA</td>
+                <td>Ga</td>
+            </tr>
+            <tr>
+                <td>ᱪ</td>
+                <td>c / ch</td>
+                <td>LICH</td>
+                <td>Cha</td>
+            </tr>
+            <tr>
+                <td>ᱡ</td>
+                <td>j / jh / chh</td>
+                <td>LICH</td>
+                <td>Ja</td>
+            </tr>
+            <tr>
+                <td>ᱴ</td>
+                <td>T / Th</td>
+                <td>AT</td>
+                <td>Ta (Retroflex)</td>
+            </tr>
+            <tr>
+                <td>ᱰ</td>
+                <td>D / Dh</td>
+                <td>ODD</td>
+                <td>Da (Retroflex)</td>
+            </tr>
+            <tr>
+                <td>ᱛ</td>
+                <td>t / th / kh</td>
+                <td>LA</td>
+                <td>Ta (Dental)</td>
+            </tr>
+            <tr>
+                <td>ᱫ</td>
+                <td>d / dh</td>
+                <td>UD</td>
+                <td>Da (Dental)</td>
+            </tr>
+            <tr>
+                <td>ᱯ</td>
+                <td>p / P / f / ph</td>
+                <td>EP</td>
+                <td>Pa</td>
+            </tr>
+            <tr>
+                <td>ᱵ</td>
+                <td>b / B / bh</td>
+                <td>UCH</td>
+                <td>Ba</td>
+            </tr>
+        </table>
+
+        <h3>Nasal Consonants</h3>
+        <table>
+            <tr>
+                <th>Ol Chiki</th>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Sound</th>
+            </tr>
+            <tr>
+                <td>ᱶ</td>
+                <td>ng</td>
+                <td>MU GAAHLAA</td>
+                <td>Ng (velar nasal)</td>
+            </tr>
+            <tr>
+                <td>ᱧ</td>
+                <td>ny</td>
+                <td>INYA</td>
+                <td>Ny (palatal nasal)</td>
+            </tr>
+            <tr>
+                <td>ᱬ</td>
+                <td>N</td>
+                <td>UUNN</td>
+                <td>N (retroflex)</td>
+            </tr>
+            <tr>
+                <td>ᱱ</td>
+                <td>n</td>
+                <td>ENN</td>
+                <td>N (dental)</td>
+            </tr>
+            <tr>
+                <td>ᱢ</td>
+                <td>m</td>
+                <td>AM</td>
+                <td>Ma</td>
+            </tr>
+            <tr>
+                <td>ᱝ</td>
+                <td>NGG / ngg</td>
+                <td>AHAD</td>
+                <td>Ngg (voiced)</td>
+            </tr>
+        </table>
+
+        <h3>Semi-vowels & Others</h3>
+        <table>
+            <tr>
+                <th>Ol Chiki</th>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Sound</th>
+            </tr>
+            <tr>
+                <td>ᱭ</td>
+                <td>y / Y</td>
+                <td>AY</td>
+                <td>Ya</td>
+            </tr>
+            <tr>
+                <td>ᱨ</td>
+                <td>r / R</td>
+                <td>IR</td>
+                <td>Ra</td>
+            </tr>
+            <tr>
+                <td>ᱞ</td>
+                <td>l / L</td>
+                <td>AL</td>
+                <td>La</td>
+            </tr>
+            <tr>
+                <td>ᱣ</td>
+                <td>v / w / W / V</td>
+                <td>AAW</td>
+                <td>Va / Wa</td>
+            </tr>
+            <tr>
+                <td>ᱥ</td>
+                <td>s / S / sh</td>
+                <td>IS</td>
+                <td>Sa / Sha</td>
+            </tr>
+            <tr>
+                <td>ᱦ</td>
+                <td>h / H</td>
+                <td>AH</td>
+                <td>Ha</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Complete Alphabet Chart -->
+    <div class="section">
+        <h2>ᱚᱞ Complete Alphabet Chart</h2>
+        <div class="grid">
+            <div class="grid-item">
+                <div class="char">ᱚ</div>
+                <div class="label">OT (aw)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱛ</div>
+                <div class="label">LA (t)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱜ</div>
+                <div class="label">PHAA (g)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱝ</div>
+                <div class="label">AHAD</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱞ</div>
+                <div class="label">AL (l)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱟ</div>
+                <div class="label">LA (a)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱠ</div>
+                <div class="label">KO (k)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱡ</div>
+                <div class="label">LICH (j)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱢ</div>
+                <div class="label">AM (m)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱣ</div>
+                <div class="label">AAW (w)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱤ</div>
+                <div class="label">IH (i)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱥ</div>
+                <div class="label">IS (s)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱦ</div>
+                <div class="label">AH (h)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱧ</div>
+                <div class="label">INYA (ny)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱨ</div>
+                <div class="label">IR (r)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱩ</div>
+                <div class="label">UUH (u)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱪ</div>
+                <div class="label">LICH (ch)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱫ</div>
+                <div class="label">UD (d)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱬ</div>
+                <div class="label">UUNN (N)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱭ</div>
+                <div class="label">AY (y)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱮ</div>
+                <div class="label">OLE (e)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱯ</div>
+                <div class="label">EP (p)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱰ</div>
+                <div class="label">ODD (D)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱱ</div>
+                <div class="label">ENN (n)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱲ</div>
+                <div class="label">TTH (r)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱳ</div>
+                <div class="label">OH (o)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱴ</div>
+                <div class="label">AT (T)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱵ</div>
+                <div class="label">UCH (b)</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱶ</div>
+                <div class="label">MU GAA (ng)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Consonant + Vowel Combinations -->
+    <div class="section">
+        <h2>ᱠ + Vowel Combinations</h2>
+        <div class="note">⚠️ In Ol Chiki, consonant and vowel are <b>separate letters side by side</b>. No combining
+            marks!</div>
+        <div class="grid">
+            <div class="grid-item">
+                <div class="char">ᱠ</div>
+                <div class="label">k</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱠᱟ</div>
+                <div class="label">ka</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱠᱤ</div>
+                <div class="label">ki</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱠᱩ</div>
+                <div class="label">ku</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱠᱮ</div>
+                <div class="label">ke</div>
+            </div>
+            <div class="grid-item">
+                <div class="char">ᱠᱳ</div>
+                <div class="label">ko</div>
+            </div>
+        </div>
+        <div class="tip">💡 Unlike Hindi/Gondi, each letter is visible separately — no merging!</div>
+    </div>
+
+    <!-- Numbers -->
+    <div class="section">
+        <h2>᱐ Numbers</h2>
+        <table>
+            <tr>
+                <th>Ol Chiki</th>
+                <th>Type</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>᱐</td>
+                <td>0</td>
+                <td>Zero</td>
+            </tr>
+            <tr>
+                <td>᱑</td>
+                <td>1</td>
+                <td>One</td>
+            </tr>
+            <tr>
+                <td>᱒</td>
+                <td>2</td>
+                <td>Two</td>
+            </tr>
+            <tr>
+                <td>᱓</td>
+                <td>3</td>
+                <td>Three</td>
+            </tr>
+            <tr>
+                <td>᱔</td>
+                <td>4</td>
+                <td>Four</td>
+            </tr>
+            <tr>
+                <td>᱕</td>
+                <td>5</td>
+                <td>Five</td>
+            </tr>
+            <tr>
+                <td>᱖</td>
+                <td>6</td>
+                <td>Six</td>
+            </tr>
+            <tr>
+                <td>᱗</td>
+                <td>7</td>
+                <td>Seven</td>
+            </tr>
+            <tr>
+                <td>᱘</td>
+                <td>8</td>
+                <td>Eight</td>
+            </tr>
+            <tr>
+                <td>᱙</td>
+                <td>9</td>
+                <td>Nine</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Punctuation -->
+    <div class="section">
+        <h2>Punctuation</h2>
+        <table>
+            <tr>
+                <th>Symbol</th>
+                <th>Type</th>
+                <th>Name</th>
+            </tr>
+            <tr>
+                <td>᱾</td>
+                <td>. (single dot)</td>
+                <td>Mucaad (Full stop)</td>
+            </tr>
+            <tr>
+                <td>᱿</td>
+                <td>... (three dots)</td>
+                <td>Double Mucaad</td>
+            </tr>
+            <tr>
+                <td>ᱹ</td>
+                <td>(special)</td>
+                <td>Relaa</td>
+            </tr>
+            <tr>
+                <td>ᱺ</td>
+                <td>(special)</td>
+                <td>Phaarkaa</td>
+            </tr>
+            <tr>
+                <td>ᱻ</td>
+                <td>(special)</td>
+                <td>Mu Ttuddag</td>
+            </tr>
+            <tr>
+                <td>ᱼ</td>
+                <td>(special)</td>
+                <td>Gaahlaa Ttuddaag</td>
+            </tr>
+            <tr>
+                <td>ᱽ</td>
+                <td>(special)</td>
+                <td>Ahad (Separator)</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Practice Words -->
+    <div class="section">
+        <h2>📝 Practice Words</h2>
+        <div class="example"><span>santaaree</span> → ᱥᱟᱱᱛᱟᱲᱤ (Santali)</div>
+        <div class="example"><span>olchiki</span> → ᱚᱞᱪᱤᱠᱤ (Ol Chiki)</div>
+        <div class="example"><span>johar</span> → ᱡᱳᱦᱟᱨ (Hello/Greetings)</div>
+        <div class="example"><span>dare</span> → ᱫᱟᱨᱮ (Water)</div>
+        <div class="example"><span>diku</span> → ᱫᱤᱠᱩ (Outsider)</div>
+        <div class="example"><span>bonga</span> → ᱵᱳᱶᱜᱟ (Spirit/God)</div>
+        <div class="example"><span>hor</span> → ᱦᱳᱨ (Person)</div>
+        <div class="example"><span>disam</span> → ᱫᱤᱥᱟᱢ (Country)</div>
+        <div class="example"><span>ote</span> → ᱳᱛᱮ (There)</div>
+        <div class="example"><span>noa</span> → ᱱᱳᱟ (This)</div>
+    </div>
+
+    <!-- Comparison -->
+    <div class="section">
+        <h2>📊 Ol Chiki vs Devanagari vs Gondi</h2>
+        <table>
+            <tr>
+                <th>Feature</th>
+                <th>Ol Chiki</th>
+                <th>Hindi</th>
+                <th>Gondi</th>
+            </tr>
+            <tr>
+                <td>Type</td>
+                <td><b>Alphabet</b></td>
+                <td>Abugida</td>
+                <td>Abugida</td>
+            </tr>
+            <tr>
+                <td>Inherent vowel</td>
+                <td><b>No</b></td>
+                <td>Yes (अ)</td>
+                <td>Yes</td>
+            </tr>
+            <tr>
+                <td>Virama/Halanta</td>
+                <td><b>Not needed</b></td>
+                <td>Yes (्)</td>
+                <td>Yes (𑵄)</td>
+            </tr>
+            <tr>
+                <td>Vowel marks</td>
+                <td><b>Separate letters</b></td>
+                <td>Combining</td>
+                <td>Combining</td>
+            </tr>
+            <tr>
+                <td>Direction</td>
+                <td>Left to Right</td>
+                <td>Left to Right</td>
+                <td>Left to Right</td>
+            </tr>
+            <tr>
+                <td>Unicode plane</td>
+                <td><b>BMP</b></td>
+                <td>BMP</td>
+                <td>SMP</td>
+            </tr>
+            <tr>
+                <td>Surrogate pairs</td>
+                <td><b>No</b></td>
+                <td>No</td>
+                <td>Yes</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Tips -->
+    <div class="section">
+        <h2>💡 Quick Tips</h2>
+        <div class="tip">✨ <b>Simplest script!</b> No virama, no halanta, no conjuncts — just type letter by letter
+        </div>
+        <div class="tip">🔤 <b>Type naturally:</b> Consonant + vowel = two separate visible letters</div>
+        <div class="tip">👆 <b>Long press:</b> Hold any key to see consonant + vowel combinations</div>
+        <div class="tip">🔄 <b>Switch:</b> Tap language button to cycle between all 5 keyboards</div>
+        <div class="tip">📱 <b>Font:</b> Noto Sans Ol Chiki — works on most modern Android devices</div>
+        <div class="tip">🔢 <b>Numbers:</b> Enable number row in settings for Ol Chiki digits</div>
+    </div>
+
+    <!-- About Raghunath Murmu -->
+    <div class="section">
+        <h2>🏛️ About Ol Chiki Script</h2>
+        <p style="font-size:13px;color:#555;margin-bottom:8px">
+            <b>Pandit Raghunath Murmu</b> (1905–1982) created the Ol Chiki script in 1925 to give the Santali language
+            its own writing system. Before Ol Chiki, Santali was written in various borrowed scripts (Bengali,
+            Devanagari, Oriya, Roman).
+        </p>
+        <p style="font-size:13px;color:#555;margin-bottom:8px">
+            The name <b>"Ol Chiki"</b> means "writing" in Santali. The script was designed to represent all the unique
+            sounds of the Santali language that other scripts couldn't capture properly.
+        </p>
+        <p style="font-size:13px;color:#555">
+            Ol Chiki is now used officially in Jharkhand, Odisha, and West Bengal. It was added to Unicode in version
+            5.1 (2008).
+        </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <h3>🌿 GondiDarshan.org</h3>
+        <p>Preserving and promoting Gond tribal heritage through technology.</p>
+        <a href="https://gondidarshan.org">Visit GondiDarshan.org →</a>
+    </div>
+
+    <div class="support">
+        <h3>☕ Support This Project</h3>
+        <p>Help us preserve endangered indigenous languages and scripts!</p>
+        <a href="https://buymeacoffee.com/hinditutorpoint">☕ Buy Me a Coffee →</a>
+    </div>
+
+</body>
+
+</html>
